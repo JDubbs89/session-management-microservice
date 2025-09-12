@@ -1,0 +1,1378 @@
+[
+    {
+        "label": "Limiter",
+        "importPath": "slowapi",
+        "description": "slowapi",
+        "isExtraImport": true,
+        "detail": "slowapi",
+        "documentation": {}
+    },
+    {
+        "label": "_rate_limit_exceeded_handler",
+        "importPath": "slowapi",
+        "description": "slowapi",
+        "isExtraImport": true,
+        "detail": "slowapi",
+        "documentation": {}
+    },
+    {
+        "label": "get_remote_address",
+        "importPath": "slowapi.util",
+        "description": "slowapi.util",
+        "isExtraImport": true,
+        "detail": "slowapi.util",
+        "documentation": {}
+    },
+    {
+        "label": "logging",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "logging",
+        "description": "logging",
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "StrEnum",
+        "importPath": "enum",
+        "description": "enum",
+        "isExtraImport": true,
+        "detail": "enum",
+        "documentation": {}
+    },
+    {
+        "label": "Request",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "APIRouter",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "HTTPException",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "Depends",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "Request",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "APIRouter",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "HTTPException",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "Depends",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "Depends",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "HTTPException",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "status",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "Security",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "HTTPException",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "HTTPException",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "Depends",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "FastAPI",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "Depends",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "HTTPException",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "Header",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "Request",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "Session",
+        "importPath": "sqlalchemy.orm",
+        "description": "sqlalchemy.orm",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.orm",
+        "documentation": {}
+    },
+    {
+        "label": "Session",
+        "importPath": "sqlalchemy.orm",
+        "description": "sqlalchemy.orm",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.orm",
+        "documentation": {}
+    },
+    {
+        "label": "Session",
+        "importPath": "sqlalchemy.orm",
+        "description": "sqlalchemy.orm",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.orm",
+        "documentation": {}
+    },
+    {
+        "label": "Session",
+        "importPath": "sqlalchemy.orm",
+        "description": "sqlalchemy.orm",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.orm",
+        "documentation": {}
+    },
+    {
+        "label": "Session",
+        "importPath": "sqlalchemy.orm",
+        "description": "sqlalchemy.orm",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.orm",
+        "documentation": {}
+    },
+    {
+        "label": "sessionmaker",
+        "importPath": "sqlalchemy.orm",
+        "description": "sqlalchemy.orm",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.orm",
+        "documentation": {}
+    },
+    {
+        "label": "Session",
+        "importPath": "sqlalchemy.orm",
+        "description": "sqlalchemy.orm",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.orm",
+        "documentation": {}
+    },
+    {
+        "label": "require_role",
+        "importPath": "auth",
+        "description": "auth",
+        "isExtraImport": true,
+        "detail": "auth",
+        "documentation": {}
+    },
+    {
+        "label": "create_access_token",
+        "importPath": "auth",
+        "description": "auth",
+        "isExtraImport": true,
+        "detail": "auth",
+        "documentation": {}
+    },
+    {
+        "label": "require_role",
+        "importPath": "auth",
+        "description": "auth",
+        "isExtraImport": true,
+        "detail": "auth",
+        "documentation": {}
+    },
+    {
+        "label": "get_user_by_username",
+        "importPath": "crud_user",
+        "description": "crud_user",
+        "isExtraImport": true,
+        "detail": "crud_user",
+        "documentation": {}
+    },
+    {
+        "label": "create_user",
+        "importPath": "crud_user",
+        "description": "crud_user",
+        "isExtraImport": true,
+        "detail": "crud_user",
+        "documentation": {}
+    },
+    {
+        "label": "get_user_by_username",
+        "importPath": "crud_user",
+        "description": "crud_user",
+        "isExtraImport": true,
+        "detail": "crud_user",
+        "documentation": {}
+    },
+    {
+        "label": "delete_user",
+        "importPath": "crud_user",
+        "description": "crud_user",
+        "isExtraImport": true,
+        "detail": "crud_user",
+        "documentation": {}
+    },
+    {
+        "label": "verify_password",
+        "importPath": "crud_user",
+        "description": "crud_user",
+        "isExtraImport": true,
+        "detail": "crud_user",
+        "documentation": {}
+    },
+    {
+        "label": "log_out_user",
+        "importPath": "crud_user",
+        "description": "crud_user",
+        "isExtraImport": true,
+        "detail": "crud_user",
+        "documentation": {}
+    },
+    {
+        "label": "log_in_user",
+        "importPath": "crud_user",
+        "description": "crud_user",
+        "isExtraImport": true,
+        "detail": "crud_user",
+        "documentation": {}
+    },
+    {
+        "label": "get_user_by_username",
+        "importPath": "crud_user",
+        "description": "crud_user",
+        "isExtraImport": true,
+        "detail": "crud_user",
+        "documentation": {}
+    },
+    {
+        "label": "get_user_by_username",
+        "importPath": "crud_user",
+        "description": "crud_user",
+        "isExtraImport": true,
+        "detail": "crud_user",
+        "documentation": {}
+    },
+    {
+        "label": "limiter",
+        "importPath": "core.limiter",
+        "description": "core.limiter",
+        "isExtraImport": true,
+        "detail": "core.limiter",
+        "documentation": {}
+    },
+    {
+        "label": "limiter",
+        "importPath": "core.limiter",
+        "description": "core.limiter",
+        "isExtraImport": true,
+        "detail": "core.limiter",
+        "documentation": {}
+    },
+    {
+        "label": "limiter",
+        "importPath": "core.limiter",
+        "description": "core.limiter",
+        "isExtraImport": true,
+        "detail": "core.limiter",
+        "documentation": {}
+    },
+    {
+        "label": "get_db",
+        "importPath": "database",
+        "description": "database",
+        "isExtraImport": true,
+        "detail": "database",
+        "documentation": {}
+    },
+    {
+        "label": "get_db",
+        "importPath": "database",
+        "description": "database",
+        "isExtraImport": true,
+        "detail": "database",
+        "documentation": {}
+    },
+    {
+        "label": "get_db",
+        "importPath": "database",
+        "description": "database",
+        "isExtraImport": true,
+        "detail": "database",
+        "documentation": {}
+    },
+    {
+        "label": "UserSession",
+        "importPath": "models",
+        "description": "models",
+        "isExtraImport": true,
+        "detail": "models",
+        "documentation": {}
+    },
+    {
+        "label": "BeaconMetadata",
+        "importPath": "models",
+        "description": "models",
+        "isExtraImport": true,
+        "detail": "models",
+        "documentation": {}
+    },
+    {
+        "label": "UserSessionUpdate",
+        "importPath": "models",
+        "description": "models",
+        "isExtraImport": true,
+        "detail": "models",
+        "documentation": {}
+    },
+    {
+        "label": "UserSessionCreate",
+        "importPath": "models",
+        "description": "models",
+        "isExtraImport": true,
+        "detail": "models",
+        "documentation": {}
+    },
+    {
+        "label": "UserCreate",
+        "importPath": "models",
+        "description": "models",
+        "isExtraImport": true,
+        "detail": "models",
+        "documentation": {}
+    },
+    {
+        "label": "UserDelete",
+        "importPath": "models",
+        "description": "models",
+        "isExtraImport": true,
+        "detail": "models",
+        "documentation": {}
+    },
+    {
+        "label": "User",
+        "importPath": "models",
+        "description": "models",
+        "isExtraImport": true,
+        "detail": "models",
+        "documentation": {}
+    },
+    {
+        "label": "Token",
+        "importPath": "models",
+        "description": "models",
+        "isExtraImport": true,
+        "detail": "models",
+        "documentation": {}
+    },
+    {
+        "label": "UserSession",
+        "importPath": "models",
+        "description": "models",
+        "isExtraImport": true,
+        "detail": "models",
+        "documentation": {}
+    },
+    {
+        "label": "BeaconMetadata",
+        "importPath": "models",
+        "description": "models",
+        "isExtraImport": true,
+        "detail": "models",
+        "documentation": {}
+    },
+    {
+        "label": "UserSessionUpdate",
+        "importPath": "models",
+        "description": "models",
+        "isExtraImport": true,
+        "detail": "models",
+        "documentation": {}
+    },
+    {
+        "label": "UserSessionCreate",
+        "importPath": "models",
+        "description": "models",
+        "isExtraImport": true,
+        "detail": "models",
+        "documentation": {}
+    },
+    {
+        "label": "create_session",
+        "importPath": "crud_user_session",
+        "description": "crud_user_session",
+        "isExtraImport": true,
+        "detail": "crud_user_session",
+        "documentation": {}
+    },
+    {
+        "label": "delete_session",
+        "importPath": "crud_user_session",
+        "description": "crud_user_session",
+        "isExtraImport": true,
+        "detail": "crud_user_session",
+        "documentation": {}
+    },
+    {
+        "label": "check_session_exists",
+        "importPath": "crud_user_session",
+        "description": "crud_user_session",
+        "isExtraImport": true,
+        "detail": "crud_user_session",
+        "documentation": {}
+    },
+    {
+        "label": "check_user_hosting_session",
+        "importPath": "crud_user_session",
+        "description": "crud_user_session",
+        "isExtraImport": true,
+        "detail": "crud_user_session",
+        "documentation": {}
+    },
+    {
+        "label": "get_user_session_by_host",
+        "importPath": "crud_user_session",
+        "description": "crud_user_session",
+        "isExtraImport": true,
+        "detail": "crud_user_session",
+        "documentation": {}
+    },
+    {
+        "label": "get_user_session_data_by_host",
+        "importPath": "crud_user_session",
+        "description": "crud_user_session",
+        "isExtraImport": true,
+        "detail": "crud_user_session",
+        "documentation": {}
+    },
+    {
+        "label": "update_session",
+        "importPath": "crud_user_session",
+        "description": "crud_user_session",
+        "isExtraImport": true,
+        "detail": "crud_user_session",
+        "documentation": {}
+    },
+    {
+        "label": "is_friend_hosting_session",
+        "importPath": "crud_user_session",
+        "description": "crud_user_session",
+        "isExtraImport": true,
+        "detail": "crud_user_session",
+        "documentation": {}
+    },
+    {
+        "label": "OAuth2PasswordRequestForm",
+        "importPath": "fastapi.security",
+        "description": "fastapi.security",
+        "isExtraImport": true,
+        "detail": "fastapi.security",
+        "documentation": {}
+    },
+    {
+        "label": "OAuth2PasswordBearer",
+        "importPath": "fastapi.security",
+        "description": "fastapi.security",
+        "isExtraImport": true,
+        "detail": "fastapi.security",
+        "documentation": {}
+    },
+    {
+        "label": "OAuth2PasswordRequestForm",
+        "importPath": "fastapi.security",
+        "description": "fastapi.security",
+        "isExtraImport": true,
+        "detail": "fastapi.security",
+        "documentation": {}
+    },
+    {
+        "label": "timedelta",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timedelta",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "os",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "os",
+        "description": "os",
+        "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "JWTError",
+        "importPath": "jose",
+        "description": "jose",
+        "isExtraImport": true,
+        "detail": "jose",
+        "documentation": {}
+    },
+    {
+        "label": "jwt",
+        "importPath": "jose",
+        "description": "jose",
+        "isExtraImport": true,
+        "detail": "jose",
+        "documentation": {}
+    },
+    {
+        "label": "CryptContext",
+        "importPath": "passlib.context",
+        "description": "passlib.context",
+        "isExtraImport": true,
+        "detail": "passlib.context",
+        "documentation": {}
+    },
+    {
+        "label": "CryptContext",
+        "importPath": "passlib.context",
+        "description": "passlib.context",
+        "isExtraImport": true,
+        "detail": "passlib.context",
+        "documentation": {}
+    },
+    {
+        "label": "text",
+        "importPath": "sqlalchemy",
+        "description": "sqlalchemy",
+        "isExtraImport": true,
+        "detail": "sqlalchemy",
+        "documentation": {}
+    },
+    {
+        "label": "text",
+        "importPath": "sqlalchemy",
+        "description": "sqlalchemy",
+        "isExtraImport": true,
+        "detail": "sqlalchemy",
+        "documentation": {}
+    },
+    {
+        "label": "create_engine",
+        "importPath": "sqlalchemy",
+        "description": "sqlalchemy",
+        "isExtraImport": true,
+        "detail": "sqlalchemy",
+        "documentation": {}
+    },
+    {
+        "label": "DBAPIError",
+        "importPath": "sqlalchemy.exc",
+        "description": "sqlalchemy.exc",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.exc",
+        "documentation": {}
+    },
+    {
+        "label": "DBAPIError",
+        "importPath": "sqlalchemy.exc",
+        "description": "sqlalchemy.exc",
+        "isExtraImport": true,
+        "detail": "sqlalchemy.exc",
+        "documentation": {}
+    },
+    {
+        "label": "json",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "json",
+        "description": "json",
+        "detail": "json",
+        "documentation": {}
+    },
+    {
+        "label": "Annotated",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "load_dotenv",
+        "importPath": "dotenv",
+        "description": "dotenv",
+        "isExtraImport": true,
+        "detail": "dotenv",
+        "documentation": {}
+    },
+    {
+        "label": "load_dotenv",
+        "importPath": "dotenv",
+        "description": "dotenv",
+        "isExtraImport": true,
+        "detail": "dotenv",
+        "documentation": {}
+    },
+    {
+        "label": "router",
+        "importPath": "routers.user_routes",
+        "description": "routers.user_routes",
+        "isExtraImport": true,
+        "detail": "routers.user_routes",
+        "documentation": {}
+    },
+    {
+        "label": "router",
+        "importPath": "routers.session_routes",
+        "description": "routers.session_routes",
+        "isExtraImport": true,
+        "detail": "routers.session_routes",
+        "documentation": {}
+    },
+    {
+        "label": "RateLimitExceeded",
+        "importPath": "slowapi.errors",
+        "description": "slowapi.errors",
+        "isExtraImport": true,
+        "detail": "slowapi.errors",
+        "documentation": {}
+    },
+    {
+        "label": "BaseModel",
+        "importPath": "pydantic",
+        "description": "pydantic",
+        "isExtraImport": true,
+        "detail": "pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "limiter",
+        "kind": 5,
+        "importPath": "src.app.core.limiter",
+        "description": "src.app.core.limiter",
+        "peekOfCode": "limiter = Limiter(key_func=get_remote_address)",
+        "detail": "src.app.core.limiter",
+        "documentation": {}
+    },
+    {
+        "label": "LogLevels",
+        "kind": 6,
+        "importPath": "src.app.core.logging",
+        "description": "src.app.core.logging",
+        "peekOfCode": "class LogLevels(StrEnum):\n    debug = \"DEBUG\"\n    info = \"INFO\"\n    warn = \"WARNING\"\n    error = \"ERROR\"\n    fatal = \"FATAL\"\ndef configure_logging(log_level: str = LogLevels.error):\n    log_level = str(log_level).upper()\n    log_levels = [level.value for level in LogLevels]\n    if log_level not in log_levels:",
+        "detail": "src.app.core.logging",
+        "documentation": {}
+    },
+    {
+        "label": "configure_logging",
+        "kind": 2,
+        "importPath": "src.app.core.logging",
+        "description": "src.app.core.logging",
+        "peekOfCode": "def configure_logging(log_level: str = LogLevels.error):\n    log_level = str(log_level).upper()\n    log_levels = [level.value for level in LogLevels]\n    if log_level not in log_levels:\n        logging.basicConfig(level=LogLevels.error)\n        return\n    if log_level == LogLevels.debug:\n        logging.basicConfiG(level=log_level, format=LOG_FORMAT_DEBUG)\n        return\n    logging.basicConfig(level=log_level)",
+        "detail": "src.app.core.logging",
+        "documentation": {}
+    },
+    {
+        "label": "LOG_FORMAT_DEBUG",
+        "kind": 5,
+        "importPath": "src.app.core.logging",
+        "description": "src.app.core.logging",
+        "peekOfCode": "LOG_FORMAT_DEBUG = \"%(levelname)s:%(message)s:%(pathname)s:%(lineno)d\"\nclass LogLevels(StrEnum):\n    debug = \"DEBUG\"\n    info = \"INFO\"\n    warn = \"WARNING\"\n    error = \"ERROR\"\n    fatal = \"FATAL\"\ndef configure_logging(log_level: str = LogLevels.error):\n    log_level = str(log_level).upper()\n    log_levels = [level.value for level in LogLevels]",
+        "detail": "src.app.core.logging",
+        "documentation": {}
+    },
+    {
+        "label": "create",
+        "kind": 2,
+        "importPath": "src.app.routers.session_routes",
+        "description": "src.app.routers.session_routes",
+        "peekOfCode": "def create(\n    request: Request, \n    session: UserSessionCreate,\n    beacon_metadata: BeaconMetadata, \n    db: Session = Depends(get_db), \n    current_user = Depends(require_role(\"user\", \"admin\"))\n    ):\n    # Does not need user steam id or user id, as they are in the db already and will be fetched\n    return create_session(db, session, beacon_metadata)\n# READ SESSION ENDPOINTS",
+        "detail": "src.app.routers.session_routes",
+        "documentation": {}
+    },
+    {
+        "label": "read_friend_session",
+        "kind": 2,
+        "importPath": "src.app.routers.session_routes",
+        "description": "src.app.routers.session_routes",
+        "peekOfCode": "def read_friend_session(\n    request: Request, db: Session = Depends(get_db), \n    current_user = Depends(require_role(\"user\", \"admin\")), \n    friend_name: str = '', session_passcode: str = ''\n    ):\n    if not is_friend_hosting_session(db, friend_name):\n        raise HTTPException(status_code=404, detail=\"User does not exist or is not hosting\")\n    return get_user_session_by_host(db, friend_name, current_user[\"username\"], session_passcode)\n# GET endpoint returning a friend's beacon metadata\n@router.get(\"/read_friend_session_data\", response_model=BeaconMetadata)",
+        "detail": "src.app.routers.session_routes",
+        "documentation": {}
+    },
+    {
+        "label": "read_friend_session_data",
+        "kind": 2,
+        "importPath": "src.app.routers.session_routes",
+        "description": "src.app.routers.session_routes",
+        "peekOfCode": "def read_friend_session_data(\n    request: Request, \n    db: Session = Depends(get_db), \n    current_user = Depends(require_role(\"user\", \"admin\")), \n    friend_name: str = '', \n    ):\n    if not is_friend_hosting_session(db, friend_name):\n        raise HTTPException(status_code=404, detail=\"User does not exist or is not hosting\")\n    return get_user_session_data_by_host(db, friend_name, current_user[\"username\"])\n# GET endpoint returning the session data by session code",
+        "detail": "src.app.routers.session_routes",
+        "documentation": {}
+    },
+    {
+        "label": "read_session_data",
+        "kind": 2,
+        "importPath": "src.app.routers.session_routes",
+        "description": "src.app.routers.session_routes",
+        "peekOfCode": "def read_session_data(\n    request: Request,\n    db: Session = Depends(get_db),\n    current_user = Depends(require_role(\"user\", \"admin\")),\n    session_code: int = 0\n    ):\n    if not check_session_exists(db, session_code):\n        raise HTTPException(status_code=404, detail=\"Session does not exist\")\n    return get_user_session_data_by_host(db, current_user[\"username\"], session_code)\n# UPDATE SESSION ENDPOINT",
+        "detail": "src.app.routers.session_routes",
+        "documentation": {}
+    },
+    {
+        "label": "update_session",
+        "kind": 2,
+        "importPath": "src.app.routers.session_routes",
+        "description": "src.app.routers.session_routes",
+        "peekOfCode": "def update_session(\n    request: Request,\n    session: UserSessionUpdate,\n    db: Session = Depends(get_db),\n    current_user = Depends(require_role(\"user\", \"admin\"))\n    ):\n    if not check_session_exists(db, session.session_code):\n        raise HTTPException(status_code=404, detail=\"Session does not exist\")\n    update_user_session(db, session, current_user[\"username\"])\n# DELETE SESSION ENDPOINT",
+        "detail": "src.app.routers.session_routes",
+        "documentation": {}
+    },
+    {
+        "label": "delete_session",
+        "kind": 2,
+        "importPath": "src.app.routers.session_routes",
+        "description": "src.app.routers.session_routes",
+        "peekOfCode": "def delete_session(\n    request: Request, \n    session_code: int,\n    host_username: str,\n    session_passcode: str = '', \n    db: Session = Depends(get_db), \n    current_user = Depends(require_role(\"user\", \"admin\"))\n    ):\n    if not check_session_exists(db, session_code):\n        raise HTTPException(status_code=404, detail=\"Session does not exist\")",
+        "detail": "src.app.routers.session_routes",
+        "documentation": {}
+    },
+    {
+        "label": "router",
+        "kind": 5,
+        "importPath": "src.app.routers.session_routes",
+        "description": "src.app.routers.session_routes",
+        "peekOfCode": "router = APIRouter(prefix=\"/sessions\")\n# Constants are unused for now, they won't work for some reason\nROLE_STANDARD = \"user\", \"admin\"\nROLE_ADMIN = \"admin\"\nROLE_USER = \"user\"\n# CREATE SESSION ENDPOINT\n@router.post(\"/create\", response_model=UserSession)\n@limiter.limit(\"1/second\")\ndef create(\n    request: Request, ",
+        "detail": "src.app.routers.session_routes",
+        "documentation": {}
+    },
+    {
+        "label": "ROLE_STANDARD",
+        "kind": 5,
+        "importPath": "src.app.routers.session_routes",
+        "description": "src.app.routers.session_routes",
+        "peekOfCode": "ROLE_STANDARD = \"user\", \"admin\"\nROLE_ADMIN = \"admin\"\nROLE_USER = \"user\"\n# CREATE SESSION ENDPOINT\n@router.post(\"/create\", response_model=UserSession)\n@limiter.limit(\"1/second\")\ndef create(\n    request: Request, \n    session: UserSessionCreate,\n    beacon_metadata: BeaconMetadata, ",
+        "detail": "src.app.routers.session_routes",
+        "documentation": {}
+    },
+    {
+        "label": "ROLE_ADMIN",
+        "kind": 5,
+        "importPath": "src.app.routers.session_routes",
+        "description": "src.app.routers.session_routes",
+        "peekOfCode": "ROLE_ADMIN = \"admin\"\nROLE_USER = \"user\"\n# CREATE SESSION ENDPOINT\n@router.post(\"/create\", response_model=UserSession)\n@limiter.limit(\"1/second\")\ndef create(\n    request: Request, \n    session: UserSessionCreate,\n    beacon_metadata: BeaconMetadata, \n    db: Session = Depends(get_db), ",
+        "detail": "src.app.routers.session_routes",
+        "documentation": {}
+    },
+    {
+        "label": "ROLE_USER",
+        "kind": 5,
+        "importPath": "src.app.routers.session_routes",
+        "description": "src.app.routers.session_routes",
+        "peekOfCode": "ROLE_USER = \"user\"\n# CREATE SESSION ENDPOINT\n@router.post(\"/create\", response_model=UserSession)\n@limiter.limit(\"1/second\")\ndef create(\n    request: Request, \n    session: UserSessionCreate,\n    beacon_metadata: BeaconMetadata, \n    db: Session = Depends(get_db), \n    current_user = Depends(require_role(\"user\", \"admin\"))",
+        "detail": "src.app.routers.session_routes",
+        "documentation": {}
+    },
+    {
+        "label": "register",
+        "kind": 2,
+        "importPath": "src.app.routers.user_routes",
+        "description": "src.app.routers.user_routes",
+        "peekOfCode": "def register(request: Request, user: UserCreate, db: Session = Depends(get_db)):\n    create_user(db, user.user_id, user.steam_id, user.username, user.password)\n    out_user = get_user_by_username(db, user.username)\n    return User(user_id=out_user[\"user_id\"], username=out_user[\"username\"], role=out_user[\"role\"])\n# Create Admin User\n@router.post(\"/register_admin\", response_model=User)\n@limiter.limit(\"6/minute\")\ndef register_admin(request: Request, user: UserCreate, db: Session = Depends(get_db), admin = Depends(require_role(\"admin\"))):\n    create_user(db, user.user_id, user.steam_id, user.username, user.password, role=\"admin\")\n    out_user = get_user_by_username(db, user.username)",
+        "detail": "src.app.routers.user_routes",
+        "documentation": {}
+    },
+    {
+        "label": "register_admin",
+        "kind": 2,
+        "importPath": "src.app.routers.user_routes",
+        "description": "src.app.routers.user_routes",
+        "peekOfCode": "def register_admin(request: Request, user: UserCreate, db: Session = Depends(get_db), admin = Depends(require_role(\"admin\"))):\n    create_user(db, user.user_id, user.steam_id, user.username, user.password, role=\"admin\")\n    out_user = get_user_by_username(db, user.username)\n    return User(user_id=out_user[\"user_id\"], username=out_user[\"username\"], role=out_user[\"role\"])\n# Read User\n@router.get(\"/me\", response_model=User)\n@limiter.limit(\"1/second\")\ndef get_me(request: Request, current_user=Depends(require_role(\"user\", \"admin\"))):\n    return User(user_id=current_user[\"user_id\"], username=current_user[\"username\"], role=current_user[\"role\"])\n# Admin only function to read any user",
+        "detail": "src.app.routers.user_routes",
+        "documentation": {}
+    },
+    {
+        "label": "get_me",
+        "kind": 2,
+        "importPath": "src.app.routers.user_routes",
+        "description": "src.app.routers.user_routes",
+        "peekOfCode": "def get_me(request: Request, current_user=Depends(require_role(\"user\", \"admin\"))):\n    return User(user_id=current_user[\"user_id\"], username=current_user[\"username\"], role=current_user[\"role\"])\n# Admin only function to read any user\n@router.get(\"/get_user\", response_model=User)\n@limiter.limit(\"1/second\")\ndef get_user(request: Request, target_username: str, db: Session = Depends(get_db), current_user=Depends(require_role(\"admin\")), ):\n    user = get_user_by_username(db, target_username)\n    return User(user_id=user[\"user_id\"], username=user[\"username\"], role=user[\"role\"])\n# Update User\n@router.post(\"/login\", response_model=Token)",
+        "detail": "src.app.routers.user_routes",
+        "documentation": {}
+    },
+    {
+        "label": "get_user",
+        "kind": 2,
+        "importPath": "src.app.routers.user_routes",
+        "description": "src.app.routers.user_routes",
+        "peekOfCode": "def get_user(request: Request, target_username: str, db: Session = Depends(get_db), current_user=Depends(require_role(\"admin\")), ):\n    user = get_user_by_username(db, target_username)\n    return User(user_id=user[\"user_id\"], username=user[\"username\"], role=user[\"role\"])\n# Update User\n@router.post(\"/login\", response_model=Token)\n@limiter.limit(\"1/second\")\ndef login(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):\n    # Tries to find the user by name and then validate the inputted password with the user's hashed password stored in the db\n    user = get_user_by_username(db, form_data.username)\n    if not user or not verify_password(form_data.password, user[\"hashed_password\"]):",
+        "detail": "src.app.routers.user_routes",
+        "documentation": {}
+    },
+    {
+        "label": "login",
+        "kind": 2,
+        "importPath": "src.app.routers.user_routes",
+        "description": "src.app.routers.user_routes",
+        "peekOfCode": "def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):\n    # Tries to find the user by name and then validate the inputted password with the user's hashed password stored in the db\n    user = get_user_by_username(db, form_data.username)\n    if not user or not verify_password(form_data.password, user[\"hashed_password\"]):\n        raise HTTPException(status_code=401, detail=\"Invalid credentials\")\n    # Creates an access token with the user's name and role\n    access_token = create_access_token(\n        data={\"sub\": user[\"username\"], \"role\": user[\"role\"]}, \n        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))\n    log_in_user(db, user[\"username\"], user[\"hashed_password\"])",
+        "detail": "src.app.routers.user_routes",
+        "documentation": {}
+    },
+    {
+        "label": "logout",
+        "kind": 2,
+        "importPath": "src.app.routers.user_routes",
+        "description": "src.app.routers.user_routes",
+        "peekOfCode": "def logout(request: Request, db: Session = Depends(get_db), current_user=Depends(require_role(\"user\", \"admin\"))):\n    log_out_user(db, current_user[\"username\"], current_user[\"hashed_password\"])\n# Delete User\n@router.delete(\"/delete\")\n@limiter.limit(\"1/second\")\ndef delete(request: Request, user: UserDelete, db: Session = Depends(get_db), current_user=Depends(require_role(\"admin\"))):\n    delete_user(db, user.username, user.password, current_user[\"username\"], current_user[\"hashed_password\"])\n@router.delete(\"/delete_me\")\n@limiter.limit(\"1/second\")\ndef delete_me(request: Request, db: Session = Depends(get_db), current_user=Depends(require_role(\"user\", \"admin\"))):",
+        "detail": "src.app.routers.user_routes",
+        "documentation": {}
+    },
+    {
+        "label": "delete",
+        "kind": 2,
+        "importPath": "src.app.routers.user_routes",
+        "description": "src.app.routers.user_routes",
+        "peekOfCode": "def delete(request: Request, user: UserDelete, db: Session = Depends(get_db), current_user=Depends(require_role(\"admin\"))):\n    delete_user(db, user.username, user.password, current_user[\"username\"], current_user[\"hashed_password\"])\n@router.delete(\"/delete_me\")\n@limiter.limit(\"1/second\")\ndef delete_me(request: Request, db: Session = Depends(get_db), current_user=Depends(require_role(\"user\", \"admin\"))):\n    delete_user(db, current_user[\"username\"], current_user[\"hashed_password\"], current_user[\"username\"], current_user[\"hashed_password\"])",
+        "detail": "src.app.routers.user_routes",
+        "documentation": {}
+    },
+    {
+        "label": "delete_me",
+        "kind": 2,
+        "importPath": "src.app.routers.user_routes",
+        "description": "src.app.routers.user_routes",
+        "peekOfCode": "def delete_me(request: Request, db: Session = Depends(get_db), current_user=Depends(require_role(\"user\", \"admin\"))):\n    delete_user(db, current_user[\"username\"], current_user[\"hashed_password\"], current_user[\"username\"], current_user[\"hashed_password\"])",
+        "detail": "src.app.routers.user_routes",
+        "documentation": {}
+    },
+    {
+        "label": "ACCESS_TOKEN_EXPIRE_MINUTES",
+        "kind": 5,
+        "importPath": "src.app.routers.user_routes",
+        "description": "src.app.routers.user_routes",
+        "peekOfCode": "ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv(\"ACCESS_TOKEN_EXPIRE_MINUTES\", \"30\"))\nrouter = APIRouter(prefix=\"/users\")\n# Constants are unused for now, they won't work for some reason\nROLE_STANDARD = \"user\", \"admin\"\nROLE_ADMIN = \"admin\"\nROLE_USER = \"user\"\n# Create User\n@router.post(\"/register\", response_model=User)\n@limiter.limit(\"6/minute\")\ndef register(request: Request, user: UserCreate, db: Session = Depends(get_db)):",
+        "detail": "src.app.routers.user_routes",
+        "documentation": {}
+    },
+    {
+        "label": "router",
+        "kind": 5,
+        "importPath": "src.app.routers.user_routes",
+        "description": "src.app.routers.user_routes",
+        "peekOfCode": "router = APIRouter(prefix=\"/users\")\n# Constants are unused for now, they won't work for some reason\nROLE_STANDARD = \"user\", \"admin\"\nROLE_ADMIN = \"admin\"\nROLE_USER = \"user\"\n# Create User\n@router.post(\"/register\", response_model=User)\n@limiter.limit(\"6/minute\")\ndef register(request: Request, user: UserCreate, db: Session = Depends(get_db)):\n    create_user(db, user.user_id, user.steam_id, user.username, user.password)",
+        "detail": "src.app.routers.user_routes",
+        "documentation": {}
+    },
+    {
+        "label": "ROLE_STANDARD",
+        "kind": 5,
+        "importPath": "src.app.routers.user_routes",
+        "description": "src.app.routers.user_routes",
+        "peekOfCode": "ROLE_STANDARD = \"user\", \"admin\"\nROLE_ADMIN = \"admin\"\nROLE_USER = \"user\"\n# Create User\n@router.post(\"/register\", response_model=User)\n@limiter.limit(\"6/minute\")\ndef register(request: Request, user: UserCreate, db: Session = Depends(get_db)):\n    create_user(db, user.user_id, user.steam_id, user.username, user.password)\n    out_user = get_user_by_username(db, user.username)\n    return User(user_id=out_user[\"user_id\"], username=out_user[\"username\"], role=out_user[\"role\"])",
+        "detail": "src.app.routers.user_routes",
+        "documentation": {}
+    },
+    {
+        "label": "ROLE_ADMIN",
+        "kind": 5,
+        "importPath": "src.app.routers.user_routes",
+        "description": "src.app.routers.user_routes",
+        "peekOfCode": "ROLE_ADMIN = \"admin\"\nROLE_USER = \"user\"\n# Create User\n@router.post(\"/register\", response_model=User)\n@limiter.limit(\"6/minute\")\ndef register(request: Request, user: UserCreate, db: Session = Depends(get_db)):\n    create_user(db, user.user_id, user.steam_id, user.username, user.password)\n    out_user = get_user_by_username(db, user.username)\n    return User(user_id=out_user[\"user_id\"], username=out_user[\"username\"], role=out_user[\"role\"])\n# Create Admin User",
+        "detail": "src.app.routers.user_routes",
+        "documentation": {}
+    },
+    {
+        "label": "ROLE_USER",
+        "kind": 5,
+        "importPath": "src.app.routers.user_routes",
+        "description": "src.app.routers.user_routes",
+        "peekOfCode": "ROLE_USER = \"user\"\n# Create User\n@router.post(\"/register\", response_model=User)\n@limiter.limit(\"6/minute\")\ndef register(request: Request, user: UserCreate, db: Session = Depends(get_db)):\n    create_user(db, user.user_id, user.steam_id, user.username, user.password)\n    out_user = get_user_by_username(db, user.username)\n    return User(user_id=out_user[\"user_id\"], username=out_user[\"username\"], role=out_user[\"role\"])\n# Create Admin User\n@router.post(\"/register_admin\", response_model=User)",
+        "detail": "src.app.routers.user_routes",
+        "documentation": {}
+    },
+    {
+        "label": "create_access_token",
+        "kind": 2,
+        "importPath": "src.app.auth",
+        "description": "src.app.auth",
+        "peekOfCode": "def create_access_token(data: dict, expires_delta: timedelta = None):\n    to_encode = data.copy()\n    expire = datetime.now() + (expires_delta or timedelta(minutes=15))\n    to_encode.update({\"exp\": expire})\n    print(SECRET_KEY)\n    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)\n# Checks required role to perform action\ndef require_role(*roles: str):\n    def _role_guard(user=Depends(get_current_user)):\n        if user[\"role\"] not in roles:",
+        "detail": "src.app.auth",
+        "documentation": {}
+    },
+    {
+        "label": "require_role",
+        "kind": 2,
+        "importPath": "src.app.auth",
+        "description": "src.app.auth",
+        "peekOfCode": "def require_role(*roles: str):\n    def _role_guard(user=Depends(get_current_user)):\n        if user[\"role\"] not in roles:\n            raise HTTPException(status_code=403, detail=\"Access denied: insufficient permissions.\")\n        return user\n    return _role_guard\n# Decodes the submitted jwt token and tries to find and validate the user\ndef get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):\n    # Defines an exception in the event of a failed authentication attempt\n    credentials_exception = HTTPException(",
+        "detail": "src.app.auth",
+        "documentation": {}
+    },
+    {
+        "label": "get_current_user",
+        "kind": 2,
+        "importPath": "src.app.auth",
+        "description": "src.app.auth",
+        "peekOfCode": "def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):\n    # Defines an exception in the event of a failed authentication attempt\n    credentials_exception = HTTPException(\n        status_code=401,\n        detail=\"Could not validate credentials\",\n        headers={\"WWW-Authenticate\": \"Bearer\"},\n    )\n    # Tries to decode the jwt token and discern the username and role from it\n    try: \n        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])",
+        "detail": "src.app.auth",
+        "documentation": {}
+    },
+    {
+        "label": "oauth2_scheme",
+        "kind": 5,
+        "importPath": "src.app.auth",
+        "description": "src.app.auth",
+        "peekOfCode": "oauth2_scheme = OAuth2PasswordBearer(tokenUrl=\"/users/login\")\nSECRET_KEY = os.getenv(\"SECRET_KEY\")\nif not SECRET_KEY:\n    raise ValueError(\"SECRET_KEY environment variable not set\")\nALGORITHM = \"HS256\"\nACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv(\"ACCESS_TOKEN_EXPIRE_MINUTES\", \"30\"))\n# Creates a jwt token to send back to the client\ndef create_access_token(data: dict, expires_delta: timedelta = None):\n    to_encode = data.copy()\n    expire = datetime.now() + (expires_delta or timedelta(minutes=15))",
+        "detail": "src.app.auth",
+        "documentation": {}
+    },
+    {
+        "label": "SECRET_KEY",
+        "kind": 5,
+        "importPath": "src.app.auth",
+        "description": "src.app.auth",
+        "peekOfCode": "SECRET_KEY = os.getenv(\"SECRET_KEY\")\nif not SECRET_KEY:\n    raise ValueError(\"SECRET_KEY environment variable not set\")\nALGORITHM = \"HS256\"\nACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv(\"ACCESS_TOKEN_EXPIRE_MINUTES\", \"30\"))\n# Creates a jwt token to send back to the client\ndef create_access_token(data: dict, expires_delta: timedelta = None):\n    to_encode = data.copy()\n    expire = datetime.now() + (expires_delta or timedelta(minutes=15))\n    to_encode.update({\"exp\": expire})",
+        "detail": "src.app.auth",
+        "documentation": {}
+    },
+    {
+        "label": "ALGORITHM",
+        "kind": 5,
+        "importPath": "src.app.auth",
+        "description": "src.app.auth",
+        "peekOfCode": "ALGORITHM = \"HS256\"\nACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv(\"ACCESS_TOKEN_EXPIRE_MINUTES\", \"30\"))\n# Creates a jwt token to send back to the client\ndef create_access_token(data: dict, expires_delta: timedelta = None):\n    to_encode = data.copy()\n    expire = datetime.now() + (expires_delta or timedelta(minutes=15))\n    to_encode.update({\"exp\": expire})\n    print(SECRET_KEY)\n    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)\n# Checks required role to perform action",
+        "detail": "src.app.auth",
+        "documentation": {}
+    },
+    {
+        "label": "ACCESS_TOKEN_EXPIRE_MINUTES",
+        "kind": 5,
+        "importPath": "src.app.auth",
+        "description": "src.app.auth",
+        "peekOfCode": "ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv(\"ACCESS_TOKEN_EXPIRE_MINUTES\", \"30\"))\n# Creates a jwt token to send back to the client\ndef create_access_token(data: dict, expires_delta: timedelta = None):\n    to_encode = data.copy()\n    expire = datetime.now() + (expires_delta or timedelta(minutes=15))\n    to_encode.update({\"exp\": expire})\n    print(SECRET_KEY)\n    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)\n# Checks required role to perform action\ndef require_role(*roles: str):",
+        "detail": "src.app.auth",
+        "documentation": {}
+    },
+    {
+        "label": "create_user",
+        "kind": 2,
+        "importPath": "src.app.crud_user",
+        "description": "src.app.crud_user",
+        "peekOfCode": "def create_user(db: Session, user_id: str, steam_id: str, username: str, password: str, role: str = \"user\"):\n    hashed = pwd_context.hash(password)\n    try:\n        db.execute(text(\"SELECT create_new_user(:i, :s, :u, :p, :r)\"), \n                   {\"i\": user_id, \"s\": steam_id,\"u\": username, \"p\": hashed, \"r\": role})\n        db.commit()\n    except DBAPIError as e:\n        db.rollback()\n        # Detect the custom error message\n        raise HTTPException(status_code=500, detail=str(e.orig))",
+        "detail": "src.app.crud_user",
+        "documentation": {}
+    },
+    {
+        "label": "delete_user",
+        "kind": 2,
+        "importPath": "src.app.crud_user",
+        "description": "src.app.crud_user",
+        "peekOfCode": "def delete_user(db: Session, username: str, password: str, executor_name: str, executor_password: str):\n    hashed = pwd_context.hash(password)\n    try:\n        db.execute(text(\"SELECT delete_user(:u, :p, :eu, :ep)\"), \n                   {\"u\": username, \"p\": hashed, \"eu\": executor_name, \"ep\": executor_password})\n        db.commit()\n    except DBAPIError as e:\n        db.rollback()\n        raise HTTPException(status_code=500, detail=str(e.orig))\n# Takes the user's ID and password to log in the user (User token has already been verified when this gets called)",
+        "detail": "src.app.crud_user",
+        "documentation": {}
+    },
+    {
+        "label": "log_in_user",
+        "kind": 2,
+        "importPath": "src.app.crud_user",
+        "description": "src.app.crud_user",
+        "peekOfCode": "def log_in_user(db: Session, username: str, password: str):\n    try:\n        result = db.execute(text(\"SELECT get_user_id_by_name(:u)\"), \n                         {\"u\": username})\n        row = result.fetchone()\n        if not row:\n            raise HTTPException(status_code=500, detail=\"User Invalid\")\n        user_id = row[0]\n        db.execute(text(\"SELECT log_in_user(:u, :p)\"),\n               {\"u\": user_id, \"p\": password})",
+        "detail": "src.app.crud_user",
+        "documentation": {}
+    },
+    {
+        "label": "log_out_user",
+        "kind": 2,
+        "importPath": "src.app.crud_user",
+        "description": "src.app.crud_user",
+        "peekOfCode": "def log_out_user(db: Session, username: str, password: str):\n    #hashed = pwd_context.hash(password)\n    try:\n        result = db.execute(text(\"SELECT get_user_id_by_name(:u)\"), \n                         {\"u\": username})\n        row = result.fetchone()\n        if not row:\n            raise HTTPException(status_code=500, detail=\"User Invalid\")\n        user_id = row[0]\n        db.execute(text(\"SELECT log_out_user(:u, :p)\"),",
+        "detail": "src.app.crud_user",
+        "documentation": {}
+    },
+    {
+        "label": "get_user_by_username",
+        "kind": 2,
+        "importPath": "src.app.crud_user",
+        "description": "src.app.crud_user",
+        "peekOfCode": "def get_user_by_username(db: Session, username: str):\n    try:\n        result = db.execute(text(\"SELECT * FROM get_user_by_name(:u)\"), \n                            {\"u\": username})\n        row = result.fetchone()\n        if row:\n            return {\"user_id\": row[1], \"user_steam_id\": row[2], \"username\": row[3], \"hashed_password\": row[4]\n                    , \"user_online\": row[5], \"last_activity\": row[6], \"role\": row[7]}\n        return None\n    except DBAPIError as e:",
+        "detail": "src.app.crud_user",
+        "documentation": {}
+    },
+    {
+        "label": "get_user_by_steam_id",
+        "kind": 2,
+        "importPath": "src.app.crud_user",
+        "description": "src.app.crud_user",
+        "peekOfCode": "def get_user_by_steam_id(db: Session, steam_id: str):\n    try:\n        result = db.execute(text(\"SELECT * FROM get_user_by_steam_id(:s)\"), \n                            {\"s\": steam_id})\n        row = result.fetchone()\n        if row:\n            return {\"user_id\": row[1], \"user_steam_id\": row[2], \"username\": row[3], \"hashed_password\": row[4]\n                    , \"user_online\": row[5], \"last_activity\": row[6], \"role\": row[7]}\n        return None\n    except DBAPIError as e:",
+        "detail": "src.app.crud_user",
+        "documentation": {}
+    },
+    {
+        "label": "verify_password",
+        "kind": 2,
+        "importPath": "src.app.crud_user",
+        "description": "src.app.crud_user",
+        "peekOfCode": "def verify_password(plain_password: str, hashed_password: str):\n    return pwd_context.verify(plain_password, hashed_password)",
+        "detail": "src.app.crud_user",
+        "documentation": {}
+    },
+    {
+        "label": "pwd_context",
+        "kind": 5,
+        "importPath": "src.app.crud_user",
+        "description": "src.app.crud_user",
+        "peekOfCode": "pwd_context = CryptContext(schemes=[\"bcrypt\"], deprecated=\"auto\")\n# Takes in username, password, and role to create a new user with said parameters\ndef create_user(db: Session, user_id: str, steam_id: str, username: str, password: str, role: str = \"user\"):\n    hashed = pwd_context.hash(password)\n    try:\n        db.execute(text(\"SELECT create_new_user(:i, :s, :u, :p, :r)\"), \n                   {\"i\": user_id, \"s\": steam_id,\"u\": username, \"p\": hashed, \"r\": role})\n        db.commit()\n    except DBAPIError as e:\n        db.rollback()",
+        "detail": "src.app.crud_user",
+        "documentation": {}
+    },
+    {
+        "label": "safe_json_parse",
+        "kind": 2,
+        "importPath": "src.app.crud_user_session",
+        "description": "src.app.crud_user_session",
+        "peekOfCode": "def safe_json_parse(json_string, default=None):\n    \"\"\"Safely parse JSON string, return default if parsing fails\"\"\"\n    if default is None:\n        default = {}\n    # Handle None, empty string, or whitespace-only strings\n    if not json_string or not str(json_string).strip():\n        return default\n    try:\n        return json.loads(str(json_string))\n    except (json.JSONDecodeError, TypeError) as e:",
+        "detail": "src.app.crud_user_session",
+        "documentation": {}
+    },
+    {
+        "label": "create_session",
+        "kind": 2,
+        "importPath": "src.app.crud_user_session",
+        "description": "src.app.crud_user_session",
+        "peekOfCode": "def create_session(db: Session, session: UserSessionCreate, beacon_metadata: BeaconMetadata):\n    try:\n        beacon_metadata_string = beacon_metadata.model_dump_json()\n        result = db.execute(text(\"SELECT * FROM create_session(:c, :h, :b, :p, :s, :w, :bl, :a)\"),\n                   {\"c\": session.session_code, \"h\": session.host_username, \"b\": beacon_metadata_string, \"p\": session.session_passcode, \n                    \"s\": session.session_status, \"w\": session.session_whitelist, \"bl\": session.session_blacklist, \n                    \"a\": session.allow_join})\n        row = result.fetchone()\n        db.commit()\n        if row:",
+        "detail": "src.app.crud_user_session",
+        "documentation": {}
+    },
+    {
+        "label": "delete_session",
+        "kind": 2,
+        "importPath": "src.app.crud_user_session",
+        "description": "src.app.crud_user_session",
+        "peekOfCode": "def delete_session(db: Session, session_code: int, host_username: str, session_passcode: str = ''):\n    try:\n        db.execute(text(\"SELECT delete_session(:c, :h, :p)\"), \n                   {\"c\": session_code, \"h\": host_username, \"p\": session_passcode})\n        db.commit()\n    except DBAPIError as e:\n        db.rollback()\n        raise HTTPException(status_code=500, detail=str(e.orig))\n# Takes in a Host username and returns the session row as a dict\ndef get_user_session_by_host(db: Session, host_username: str, client_username: str, session_passcode: str = ''):",
+        "detail": "src.app.crud_user_session",
+        "documentation": {}
+    },
+    {
+        "label": "get_user_session_by_host",
+        "kind": 2,
+        "importPath": "src.app.crud_user_session",
+        "description": "src.app.crud_user_session",
+        "peekOfCode": "def get_user_session_by_host(db: Session, host_username: str, client_username: str, session_passcode: str = ''):\n    try:\n        result = db.execute(text(\"SELECT get_session_by_username(:h, :c, :p)\"), \n                            {\"h\": host_username, \"c\": client_username, \"p\": session_passcode})\n        row = result.fetchone()\n        if row:\n            return UserSession(row[0], row[2], row[3], row[4],\n                               row[5], row[1], row[6], row[7], \n                               row[8], row[9])\n        else:",
+        "detail": "src.app.crud_user_session",
+        "documentation": {}
+    },
+    {
+        "label": "get_user_session_data_by_host",
+        "kind": 2,
+        "importPath": "src.app.crud_user_session",
+        "description": "src.app.crud_user_session",
+        "peekOfCode": "def get_user_session_data_by_host(db: Session, host_username: str):\n    default_flavortext = \"Some delicious flavor text\"\n    default_player_count = 0\n    default_max_player_count = 4\n    default_start_time = \"2025-01-01T00:00:00Z\"\n    try:\n        result = db.execute(text(\"SELECT get_session_preview_by_username(:h)\"),\n            {\"h\": host_username})\n        row = result.fetchone()\n        if row:",
+        "detail": "src.app.crud_user_session",
+        "documentation": {}
+    },
+    {
+        "label": "get_user_session_data_by_code",
+        "kind": 2,
+        "importPath": "src.app.crud_user_session",
+        "description": "src.app.crud_user_session",
+        "peekOfCode": "def get_user_session_data_by_code(db: Session, session_code: int):\n    default_flavortext = \"Some delicious flavor text\"\n    default_player_count = 0\n    default_max_player_count = 4\n    default_start_time = \"2025-01-01T00:00:00Z\"\n    try:\n        result = db.execute(text(\"SELECT get_session_preview_by_code(:c)\"),\n            {\"c\": session_code})\n        row = result.fetchone()\n        if row:",
+        "detail": "src.app.crud_user_session",
+        "documentation": {}
+    },
+    {
+        "label": "is_friend_hosting_session",
+        "kind": 2,
+        "importPath": "src.app.crud_user_session",
+        "description": "src.app.crud_user_session",
+        "peekOfCode": "def is_friend_hosting_session(db: Session, friend_name: str):\n    friend = get_user_by_username(db, friend_name)\n    if friend and check_user_hosting_session(db, friend[\"username\"]):\n        return True\n    return False\ndef check_session_exists(db: Session, session_code: int):\n    try:\n        result = db.execute(text(\"SELECT does_session_exist(:c)\"),\n                            {\"c\": session_code})\n        row = result.fetchone()",
+        "detail": "src.app.crud_user_session",
+        "documentation": {}
+    },
+    {
+        "label": "check_session_exists",
+        "kind": 2,
+        "importPath": "src.app.crud_user_session",
+        "description": "src.app.crud_user_session",
+        "peekOfCode": "def check_session_exists(db: Session, session_code: int):\n    try:\n        result = db.execute(text(\"SELECT does_session_exist(:c)\"),\n                            {\"c\": session_code})\n        row = result.fetchone()\n        if row and row[0]:\n            return True\n        else:\n            return False\n    except DBAPIError as e:",
+        "detail": "src.app.crud_user_session",
+        "documentation": {}
+    },
+    {
+        "label": "check_user_hosting_session",
+        "kind": 2,
+        "importPath": "src.app.crud_user_session",
+        "description": "src.app.crud_user_session",
+        "peekOfCode": "def check_user_hosting_session(db: Session, host_username: str):\n    try:\n        result = db.execute(text(\"SELECT check_user_hosting_session(:h)\"),\n                            {\"h\": host_username})\n        row = result.fetchone()\n        if row and row[0]:\n            return True\n        else:\n            return False\n    except DBAPIError as e:",
+        "detail": "src.app.crud_user_session",
+        "documentation": {}
+    },
+    {
+        "label": "update_session",
+        "kind": 2,
+        "importPath": "src.app.crud_user_session",
+        "description": "src.app.crud_user_session",
+        "peekOfCode": "def update_session(db: Session, session_update: UserSessionUpdate, current_username: str):\n    if not check_session_exists(db, session_update.session_code):\n        raise HTTPException(status_code=404, detail=\"Session does not exist\")\n    session_data = get_user_session_data_by_code(db, session_update.session_code)\n    session_host = get_user_by_username(db, session_data.host_username)\n    if not session_host:\n        raise HTTPException(status_code=404, detail=\"Session host does not exist\")\n    session = get_user_session_by_host(db, session_host, current_username, session_update.session_passcode)\n    settings = session_update.settings_to_update\n    try:",
+        "detail": "src.app.crud_user_session",
+        "documentation": {}
+    },
+    {
+        "label": "get_db",
+        "kind": 2,
+        "importPath": "src.app.database",
+        "description": "src.app.database",
+        "peekOfCode": "def get_db():\n    db = SessionLocal()\n    try:\n        yield db\n    finally:\n        db.close()\nDbSession = Annotated[Session, Depends(get_db)]",
+        "detail": "src.app.database",
+        "documentation": {}
+    },
+    {
+        "label": "DATABASE_URL",
+        "kind": 5,
+        "importPath": "src.app.database",
+        "description": "src.app.database",
+        "peekOfCode": "DATABASE_URL = os.getenv(\"DATABASE_URL\")\nengine = create_engine(DATABASE_URL)\nSessionLocal = sessionmaker(bind=engine)\ndef get_db():\n    db = SessionLocal()\n    try:\n        yield db\n    finally:\n        db.close()\nDbSession = Annotated[Session, Depends(get_db)]",
+        "detail": "src.app.database",
+        "documentation": {}
+    },
+    {
+        "label": "engine",
+        "kind": 5,
+        "importPath": "src.app.database",
+        "description": "src.app.database",
+        "peekOfCode": "engine = create_engine(DATABASE_URL)\nSessionLocal = sessionmaker(bind=engine)\ndef get_db():\n    db = SessionLocal()\n    try:\n        yield db\n    finally:\n        db.close()\nDbSession = Annotated[Session, Depends(get_db)]",
+        "detail": "src.app.database",
+        "documentation": {}
+    },
+    {
+        "label": "SessionLocal",
+        "kind": 5,
+        "importPath": "src.app.database",
+        "description": "src.app.database",
+        "peekOfCode": "SessionLocal = sessionmaker(bind=engine)\ndef get_db():\n    db = SessionLocal()\n    try:\n        yield db\n    finally:\n        db.close()\nDbSession = Annotated[Session, Depends(get_db)]",
+        "detail": "src.app.database",
+        "documentation": {}
+    },
+    {
+        "label": "DbSession",
+        "kind": 5,
+        "importPath": "src.app.database",
+        "description": "src.app.database",
+        "peekOfCode": "DbSession = Annotated[Session, Depends(get_db)]",
+        "detail": "src.app.database",
+        "documentation": {}
+    },
+    {
+        "label": "health_check",
+        "kind": 2,
+        "importPath": "src.app.main",
+        "description": "src.app.main",
+        "peekOfCode": "def health_check(request: Request):\n    return {\"status\": \"ok\"}",
+        "detail": "src.app.main",
+        "documentation": {}
+    },
+    {
+        "label": "app",
+        "kind": 5,
+        "importPath": "src.app.main",
+        "description": "src.app.main",
+        "peekOfCode": "app = FastAPI()\napp.include_router(user_router)\napp.include_router(session_router)\napp.state.limiter = limiter\napp.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)\n@app.get(\"/\")\n@limiter.limit(\"6/minute\")\ndef health_check(request: Request):\n    return {\"status\": \"ok\"}",
+        "detail": "src.app.main",
+        "documentation": {}
+    },
+    {
+        "label": "app.state.limiter",
+        "kind": 5,
+        "importPath": "src.app.main",
+        "description": "src.app.main",
+        "peekOfCode": "app.state.limiter = limiter\napp.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)\n@app.get(\"/\")\n@limiter.limit(\"6/minute\")\ndef health_check(request: Request):\n    return {\"status\": \"ok\"}",
+        "detail": "src.app.main",
+        "documentation": {}
+    },
+    {
+        "label": "UserCreate",
+        "kind": 6,
+        "importPath": "src.app.models",
+        "description": "src.app.models",
+        "peekOfCode": "class UserCreate(BaseModel):\n    user_id: str\n    steam_id: str\n    username: str\n    password: str\nclass UserDelete(BaseModel):\n    username: str\n    password: str\n# Input model for login (OAuth2 handles this too)\nclass UserLogin(BaseModel):",
+        "detail": "src.app.models",
+        "documentation": {}
+    },
+    {
+        "label": "UserDelete",
+        "kind": 6,
+        "importPath": "src.app.models",
+        "description": "src.app.models",
+        "peekOfCode": "class UserDelete(BaseModel):\n    username: str\n    password: str\n# Input model for login (OAuth2 handles this too)\nclass UserLogin(BaseModel):\n    username: str\n    password: str\n# Output model for returning user data\nclass User(BaseModel):\n    user_id: str",
+        "detail": "src.app.models",
+        "documentation": {}
+    },
+    {
+        "label": "UserLogin",
+        "kind": 6,
+        "importPath": "src.app.models",
+        "description": "src.app.models",
+        "peekOfCode": "class UserLogin(BaseModel):\n    username: str\n    password: str\n# Output model for returning user data\nclass User(BaseModel):\n    user_id: str\n    username: str\n    role: str\n    class Config:\n        orm_mode = True  # Enables compatibility with ORM objects",
+        "detail": "src.app.models",
+        "documentation": {}
+    },
+    {
+        "label": "User",
+        "kind": 6,
+        "importPath": "src.app.models",
+        "description": "src.app.models",
+        "peekOfCode": "class User(BaseModel):\n    user_id: str\n    username: str\n    role: str\n    class Config:\n        orm_mode = True  # Enables compatibility with ORM objects\n# Input model for a session modification (Endpoint checks if the host is the current user)\nclass UserSessionCreate(BaseModel):\n    session_code: int\n    host_username: str",
+        "detail": "src.app.models",
+        "documentation": {}
+    },
+    {
+        "label": "UserSessionCreate",
+        "kind": 6,
+        "importPath": "src.app.models",
+        "description": "src.app.models",
+        "peekOfCode": "class UserSessionCreate(BaseModel):\n    session_code: int\n    host_username: str\n    host_steam_id: str\n    host_user_id: str\n    beacon_metadata: str\n    session_passcode: str = ''\n    session_whitelist: str = '{}'\n    session_blacklist: str = '{}'\n    session_status: str = \"active\"",
+        "detail": "src.app.models",
+        "documentation": {}
+    },
+    {
+        "label": "UserSessionUpdate",
+        "kind": 6,
+        "importPath": "src.app.models",
+        "description": "src.app.models",
+        "peekOfCode": "class UserSessionUpdate(BaseModel):\n    session_code: int\n    session_passcode: str\n    settings_to_update: dict\n# Output model for a session\nclass UserSession(BaseModel):\n    session_code: int\n    host_user_id: str\n    host_username: str\n    host_steam_id: str",
+        "detail": "src.app.models",
+        "documentation": {}
+    },
+    {
+        "label": "UserSession",
+        "kind": 6,
+        "importPath": "src.app.models",
+        "description": "src.app.models",
+        "peekOfCode": "class UserSession(BaseModel):\n    session_code: int\n    host_user_id: str\n    host_username: str\n    host_steam_id: str\n    beacon_metadata: dict\n    session_passcode: str\n    session_whitelist: dict\n    session_blacklist: dict\n    session_status: str",
+        "detail": "src.app.models",
+        "documentation": {}
+    },
+    {
+        "label": "BeaconMetadata",
+        "kind": 6,
+        "importPath": "src.app.models",
+        "description": "src.app.models",
+        "peekOfCode": "class BeaconMetadata(BaseModel):\n    session_flavortext: str\n    player_count: int\n    max_player_count: int\n    session_start_time: str  # ISO format datetime string\n    host_username: str\n    host_steam_id: str\nclass Token(BaseModel):\n    access_token: str\n    token_type: str = \"bearer\"",
+        "detail": "src.app.models",
+        "documentation": {}
+    },
+    {
+        "label": "Token",
+        "kind": 6,
+        "importPath": "src.app.models",
+        "description": "src.app.models",
+        "peekOfCode": "class Token(BaseModel):\n    access_token: str\n    token_type: str = \"bearer\"",
+        "detail": "src.app.models",
+        "documentation": {}
+    }
+]

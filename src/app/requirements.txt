@@ -1,0 +1,25 @@
+# FastAPI framework
+fastapi
+
+# SlowAPI framework for rate limiting
+slowapi
+
+# ASGI server
+uvicorn
+
+# ORM for database access
+sqlalchemy
+python-multipart
+
+# PostgreSQL driver
+psycopg2-binary
+
+# Data validation and serialization
+pydantic
+
+# Dotenv integration
+python-dotenv
+
+# Passlib and Python-jose for password hashing and JWT creation/validation
+passlib[bcrypt]
+python-jose[cryptography]
