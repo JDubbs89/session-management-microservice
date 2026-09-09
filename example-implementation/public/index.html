@@ -1,28 +1,32 @@
-<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Session API Trivia</title>
-<style>body{font:18px system-ui;max-width:850px;margin:40px auto;padding:0 20px;background:#142136;color:#edf2fa}input,button{font:inherit;padding:8px;margin:4px}button{cursor:pointer}section{border:1px solid #64748b;border-radius:12px;padding:16px;margin:16px 0}#log{white-space:pre-wrap}small{display:block}</style>
-<h1>Server-hosted trivia</h1><p>The Node.js server owns game state and calls the session API. Open a second browser window for another player.</p>
-<section><h2>Account</h2><input id="username" placeholder="Username" autocomplete="username"><input id="password" type="password" placeholder="Password" autocomplete="current-password"><button data-action="register">Register & sign in</button><button data-action="login">Sign in</button><button data-action="logout">Sign out</button><button id="delete">Delete my account</button><p id="identity">Signed out</p></section>
-<section><h2>Find a room</h2><button data-action="host">Host trivia</button><input id="host" placeholder="Host username"><button data-action="preview" data-kind="host">Preview host</button><button data-action="join">Join host</button><input id="code" placeholder="Session code" inputmode="numeric"><button data-action="preview" data-kind="code">Preview code</button><button data-action="leave">Leave / close room</button><small>Wait at least one second between actions. A host closes the room by leaving.</small></section>
-<section><h2 id="title">Lobby</h2><p id="question">Host or join a room to play.</p><div id="choices"></div><p id="scores"></p><button data-action="next">Host: start / next / results</button></section>
-<p role="status" id="log">Connecting…</p>
-<script>
-const ws = new WebSocket(`${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/play`);
-const el = id => document.getElementById(id);
-function send(message) { if(ws.readyState === 1) ws.send(JSON.stringify(message)); }
-document.querySelectorAll('[data-action]').forEach(button => button.onclick = () => {
-  const message = {action:button.dataset.action};
-  if(['register','login'].includes(message.action)){message.username=el('username').value;message.password=el('password').value;el('password').value='';}
-  if(message.action==='join'||button.dataset.kind==='host') message.host=el('host').value;
-  if(button.dataset.kind==='code') message.code=el('code').value;
-  send(message);
-});
-el('delete').onclick = () => {if(confirm('Permanently delete this demo account?'))send({action:'delete_me'});};
-ws.onmessage = event => {
- const data=JSON.parse(event.data);
- if('user' in data)el('identity').textContent=data.user?`Signed in as ${data.user.username}`:'Signed out';
- if('state' in data && data.state === null){el('title').textContent='Lobby';el('question').textContent='Host or join a room to play.';el('choices').replaceChildren();el('scores').textContent='';}
- if(data.state){const s=data.state;el('title').textContent=`Room ${s.code} · host ${s.host}`;el('question').textContent=s.finished?'Final scores!':s.question?.text||'Waiting for host to start';el('choices').replaceChildren();s.question?.choices.forEach((choice,index)=>{const b=document.createElement('button');b.textContent=choice;b.onclick=()=>send({action:'answer',choice:index});el('choices').append(b);});el('scores').textContent=s.scores.map(p=>`${p.name}: ${p.score}`).join(' · ')+` (${s.answered} answered)`;}
- if(data.error||data.notice||data.preview)el('log').textContent=data.error||data.notice||JSON.stringify(data.preview,null,2);
-};
-ws.onclose=()=>el('log').textContent='Disconnected. Refresh to sign in again.';
-</script></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quiz Night · Play together</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="/">Q<span>Quiz Night</span></a><div class="account"><span id="identity"></span><button id="account-button" class="quiet" hidden>Account</button></div></header>
+  <main>
+    <div id="connection" class="banner" role="status">Connecting…</div>
+    <div id="feedback" class="banner" role="status" aria-live="polite" hidden></div>
+    <section id="auth-view" class="welcome view">
+      <div class="intro"><p class="eyebrow">A little friendly competition</p><h1>Good company.<br>Great guesses.</h1><p>Bring your friends for three quick questions. Start a room, take your best shot, and see who comes out on top.</p><div class="facts"><span>3 questions</span><span>Up to 4 players</span><span>One winner?</span></div></div>
+      <div class="card"><div class="tabs" aria-label="Account options"><button id="login-tab" aria-pressed="true">Sign in</button><button id="register-tab" aria-pressed="false">Create account</button></div><h2 id="auth-title">Welcome back</h2><p id="auth-description" class="muted">Your next quiz night starts here.</p><form id="auth-form"><label for="username">Username</label><input id="username" autocomplete="username" required minlength="3" maxlength="24" pattern="[a-zA-Z0-9_]+" aria-describedby="username-hint"><small id="username-hint">3–24 letters, numbers, or underscores.</small><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required minlength="8" maxlength="72"><button id="auth-submit" class="primary full" type="submit">Sign in</button></form></div>
+    </section>
+    <section id="home-view" class="view" hidden>
+      <p class="eyebrow">Make a night of it</p><h1 id="greeting">Ready to play?</h1><p class="muted">Start your own quiz or meet your friends in theirs.</p>
+      <div class="home-grid"><article class="card host-card"><span class="tile-icon">＋</span><h2>Your room. Your crew.</h2><p>Invite up to three friends. As host, you choose when each question starts.</p><button id="host-button" class="primary">Create a room</button></article>
+      <article class="card"><h2>Join your friends</h2><p class="muted">Find a room with its code or the host’s username.</p><form id="find-form"><label for="lookup-type">Find by</label><select id="lookup-type"><option value="code">Room code</option><option value="host">Host username</option></select><label id="lookup-label" for="lookup">Room code</label><input id="lookup" required placeholder="e.g. 123456" inputmode="numeric"><button class="secondary full" type="submit">Find room</button></form><div id="room-preview" class="preview" hidden><h3 id="preview-title"></h3><p id="preview-detail"></p><button id="join-button" class="primary full">Join room</button></div></article></div>
+    </section>
+    <section id="room-view" class="view" hidden>
+      <div class="room-bar"><div><p class="eyebrow" id="room-phase">The waiting room</p><h1 id="room-title"></h1></div><button id="leave-button" class="quiet">Leave room</button></div>
+      <div class="play-grid"><article class="card play-card"><p id="round-label" class="eyebrow"></p><h2 id="question"></h2><p id="room-description" class="muted"></p><div id="invite" class="invite"><span>Room code</span><strong id="invite-code"></strong><button id="copy-button" class="quiet">Copy code</button></div><div id="choices" class="choices"></div><p id="answer-status" role="status" aria-live="polite"></p><button id="next-button" class="primary">Start quiz</button><button id="return-button" class="primary" hidden>Back to lobby</button></article><aside class="card"><p class="eyebrow" id="score-label">Your players</p><ol id="players" class="players"></ol><p id="player-help" class="muted"></p></aside></div>
+    </section>
+  </main>
+  <footer>Quiz Night <span>Three questions. A little bragging rights.</span></footer>
+  <dialog id="account-dialog"><h2>Your account</h2><p id="account-name"></p><p class="muted">Leaving as host closes your room for everyone.</p><button id="logout-button" class="secondary full">Sign out</button><button id="delete-button" class="danger full">Delete account</button><button id="close-account" class="quiet full">Keep playing</button></dialog>
+</body>
+</html>

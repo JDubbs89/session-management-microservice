@@ -1,0 +1,64 @@
+name: session-trivia-demo
+
+services:
+  db:
+    build:
+      context: ../src/db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: trivia
+      POSTGRES_PASSWORD: local-trivia-demo-password
+      POSTGRES_DB: trivia
+    volumes:
+      - demo-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      # TCP succeeds only after the temporary initialization server has stopped.
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U trivia -d trivia"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+
+  api:
+    build:
+      context: ../src/app
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+psycopg2://trivia:local-trivia-demo-password@db:5432/trivia
+      SECRET_KEY: ${DEMO_SECRET_KEY:-local-trivia-demo-only-change-before-deployment}
+      ACCESS_TOKEN_EXPIRE_MINUTES: "60"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "healthcheck.py"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
+  game:
+    build:
+      context: .
+    init: true
+    restart: unless-stopped
+    environment:
+      HOST: 0.0.0.0
+      PORT: "3000"
+      PUBLIC_ORIGIN: ${DEMO_PUBLIC_ORIGIN:-http://127.0.0.1:${DEMO_PORT:-3000}}
+      SESSION_API_URL: http://api:8000
+      TRIVIA_MOCK: "0"
+    ports:
+      - "127.0.0.1:${DEMO_PORT:-3000}:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "--input-type=module", "-e", "const r = await fetch('http://127.0.0.1:3000/', {signal: AbortSignal.timeout(3000)}); if (!r.ok) process.exit(1);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  demo-pgdata:

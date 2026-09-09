@@ -2,6 +2,59 @@
 
 The browser connects only to the Node game server. Node retains API bearer tokens in memory, calls the Python API for accounts and session discovery, and owns room membership, questions and scoring. Correct answers never travel to the browser. This is a local teaching example, with four players and three questions per room.
 
+## Run the complete demo with Docker
+
+Requires Docker Engine and Docker Compose (`docker-compose`). From the repository root:
+
+```sh
+docker-compose -f example-implementation/docker-compose.yml up --build -d --wait
+```
+
+Open **http://127.0.0.1:3000** in two windows and follow the player walkthrough below. The equivalent `localhost` address also works; WebSocket Origin validation accepts loopback aliases on the configured port. No local Python, Node, or environment file is needed for this Docker demo.
+
+The stack runs three containers: PostgreSQL initializes the schema and stored functions on the first boot; the API waits for PostgreSQL; the game waits for API/database readiness. The game uses the real API at `http://api:8000` through Compose service discovery, with mock mode disabled. The API and database have no host ports. The game listens on all interfaces inside its container, with its host port bound only to `127.0.0.1`.
+
+This stack uses fixed local demo database credentials and a demo signing secret. `DEMO_SECRET_KEY` overrides the signing secret. `DEMO_PUBLIC_ORIGIN` sets an explicit browser origin when using a local reverse proxy (which must forward WebSocket upgrades). Other origins remain rejected. `DEMO_PORT` changes the browser port and allowed origin together, for example:
+
+```sh
+DEMO_PORT=3001 docker-compose -f example-implementation/docker-compose.yml up --build -d --wait
+```
+
+Open `http://127.0.0.1:3001` for that configuration. Use the same environment overrides for subsequent Compose commands.
+
+```sh
+# Inspect startup and API calls.
+docker-compose -f example-implementation/docker-compose.yml logs -f api game
+
+# Stop the demo while preserving accounts in the dedicated database volume.
+docker-compose -f example-implementation/docker-compose.yml down
+```
+
+The volume is separate from the original `src/docker-compose.yml` stack. Restarting preserves accounts, but game rooms live in Node memory; close rooms before stopping the demo. Abrupt shutdown can leave stale session records, as tracked in the roadmap. Initialization scripts do not migrate an existing volume.
+
+The database image bundles the SQL initialization files with container-readable permissions. It does not bind-mount the host SQL directory. After pulling changes to those files, rebuild with the startup command above. If an older stack reports `ls: cannot open directory '/docker-entrypoint-initdb.d/': Permission denied`, rebuilding and recreating the database container removes that mount while preserving the data volume:
+
+```sh
+docker-compose -f example-implementation/docker-compose.yml up --build -d --wait
+```
+
+If startup still fails, inspect `docker-compose -f example-implementation/docker-compose.yml logs --tail=100 db api`. Do not rerun `init.sql` manually over an existing database: its table scripts contain `DROP TABLE` statements.
+
+To exercise the administrator routes inside this stack:
+
+```sh
+docker-compose -f example-implementation/docker-compose.yml exec api python bootstrap_admin.py --username trivia-service
+read -r -p 'Admin username: ' ADMIN_USERNAME
+read -r -s -p 'Admin password: ' ADMIN_PASSWORD
+export ADMIN_USERNAME ADMIN_PASSWORD
+docker-compose -f example-implementation/docker-compose.yml exec -e ADMIN_USERNAME -e ADMIN_PASSWORD game npm run operator
+unset ADMIN_USERNAME ADMIN_PASSWORD
+```
+
+Bootstrap only once. The operator uses the game's internal API URL and removes its temporary administrator when finished.
+
+## Run without Docker
+
 Requires Node.js 22 or newer.
 
 ```sh
@@ -10,7 +63,7 @@ npm ci
 npm run demo
 ```
 
-Open http://127.0.0.1:3000 in two windows. Register distinct accounts (passwords at least eight characters). Host a room in one window, preview it by host or room code in the other, then join by host username. The host starts each question and advances after players answer. After question three, advance once more for final scores. Leave closes the host's API session. Sign out or delete disposable accounts afterward.
+Open http://127.0.0.1:3000 in two windows. Register distinct accounts (passwords at least eight characters). Choose **Create a room** in one window. In the other, find it by room code or host username and select **Join room**. The waiting room shows an invite code and the players. Only the host sees **Start quiz** and **Next question**; answers lock after submission. After question three, the host selects **See results**. **Back to lobby** leaves the room so you can start another game. Account controls contain sign-out and account deletion. Loading states pace requests automatically.
 
 `npm run demo` explicitly uses an in-memory mock: no real API requests, database persistence, or backend validation. Restarting loses everything. Mock tests do not establish PostgreSQL integration correctness.
 
@@ -68,4 +121,4 @@ Tests cover all endpoint request shapes, errors, scoring, invalid/duplicate answ
 
 Only the local host can advance questions; membership and answers are checked on the server. Rooms lock when play starts. The host controls question timing, and scores update immediately. Each account gets one active connection. Tokens remain in Node memory; browser refresh requires sign-in again. Disconnect removes local membership; a host disconnect attempts API session deletion and closes the room. Failed remote cleanup is logged and requires operator attention. Tokens can expire during a game; failures are surfaced without silent reauthentication.
 
-This binds to loopback and validates WebSocket Origin (default `http://127.0.0.1:3000`). `PORT` and `PUBLIC_ORIGIN` customize local serving. Deployment needs TLS, stronger anti-abuse controls, durable/shared game state, reliable session leases/cleanup and service identity/delegation in the API. This example currently acts on player tokens held server-side; it does not implement a service-account credential flow that the API does not yet provide. Do not expose this demo directly to the internet.
+Outside Docker, this defaults to loopback and validates WebSocket Origin (default `http://127.0.0.1:3000`). `HOST`, `PORT`, and `PUBLIC_ORIGIN` customize serving; Compose sets these for container networking. Deployment needs TLS, stronger anti-abuse controls, durable/shared game state, reliable session leases/cleanup and service identity/delegation in the API. This example currently acts on player tokens held server-side; it does not implement a service-account credential flow that the API does not yet provide. Do not expose this demo directly to the internet.

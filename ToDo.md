@@ -12,6 +12,9 @@ The current player JWT flow supports the example, but is not yet a complete serv
 - [x] Add a Node.js WebSocket trivia example with an API client covering all 15 current application endpoints and a separate admin workflow.
 - [x] Correct immediate session lookup/mapping and ownership defects, account deletion password handling, and password hashing compatibility.
 - [x] Remove secret logging, the invalid default admin seed, and volume-deleting startup commands; provide an explicit admin bootstrap command.
+- [x] Add a standalone Docker Compose demo with separate game, API, and PostgreSQL containers, persistent initialization, readiness checks, and internal game-to-API networking. Live container validation remains pending.
+- [x] Bundle SQL initialization files in the PostgreSQL image with readable permissions instead of a host bind mount, fixing the reported initialization-directory access failure. Preserve the existing database volume during rebuilds.
+- [x] Refactor the trivia UI into account, lobby, room, question, and results screens with responsive layouts, room-code joining, loading states, and confirmed answer locking.
 - [x] Add backend regression tests and example tests, with mock mode clearly separated from live API integration.
 
 These changes establish a development starting point. The acceptance checks below remain open until verified against PostgreSQL and the intended deployment environment.

@@ -24,6 +24,6 @@ export class Game {
   }
   snapshot() {
     const q = questions[this.round];
-    return { host: this.host, code: this.code, round: this.round, finished: this.finished, question: q ? { text: q.text, choices: q.choices } : null, scores: [...this.players].map(([name, score]) => ({ name, score })), answered: this.answers.size };
+    return { totalQuestions: questions.length, host: this.host, code: this.code, round: this.round, finished: this.finished, question: q ? { text: q.text, choices: q.choices } : null, scores: [...this.players].map(([name, score]) => ({ name, score })), answered: this.answers.size };
   }
 }

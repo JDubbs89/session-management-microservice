@@ -20,16 +20,26 @@ The game server owns gameplay, rooms, membership, timers, and scoring. This API 
 
 Friendship and messaging router files are placeholders, not available endpoints. Legacy Steam fields and `beacon_metadata` remain for compatibility. Logout marks the account offline and rejects protected requests while offline. It does not permanently revoke a JWT; an unexpired token can become usable again after another login. This is a development baseline; the roadmap tracks service authentication, migrations, access-policy hardening, and release checks.
 
+## Complete Docker demo
+
+Start the API, database, and WebSocket trivia game together:
+
+```sh
+docker-compose -f example-implementation/docker-compose.yml up --build -d --wait
+```
+
+Open http://127.0.0.1:3000 in two windows. The game calls the API container directly; PostgreSQL initializes automatically on the first boot. Only the game port is published. This local demo uses its own persistent volume and development credentials, with no environment file required. See [the demo instructions](example-implementation/README.md#run-the-complete-demo-with-docker) for port overrides, logs, shutdown, and administrator setup.
+
 ## Local setup
 
-Requirements: Docker Engine with Docker Compose, and Node.js 22 or newer for the example.
+Requirements: Docker Engine with `docker-compose`, and Node.js 22 or newer for the example.
 
 From the repository root:
 
 ```sh
 cp .env.example src/.env
 # Edit src/.env and replace SECRET_KEY with a random secret.
-docker compose --env-file src/.env -f src/docker-compose.yml up --build
+docker-compose --env-file src/.env -f src/docker-compose.yml up --build
 ```
 
 The API listens on `http://localhost:8000`. Interactive API documentation is at `/docs`, and the machine-readable contract is at `/openapi.json`. `GET /` reports process liveness, not database readiness.
@@ -39,7 +49,7 @@ PostgreSQL initialization runs only on an empty data volume. SQL edits do not mi
 Create the first administrator from a trusted local shell when testing admin-only routes. The command prompts for a password and refuses to run if an administrator already exists:
 
 ```sh
-docker compose --env-file src/.env -f src/docker-compose.yml exec api python bootstrap_admin.py --username trivia-service
+docker-compose --env-file src/.env -f src/docker-compose.yml exec api python bootstrap_admin.py --username trivia-service
 ```
 
 For the game setup, player walkthrough, endpoint coverage, and operator workflow, follow [the example README](example-implementation/README.md).

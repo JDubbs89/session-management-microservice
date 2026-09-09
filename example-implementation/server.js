@@ -7,21 +7,40 @@ import { MockApi } from './mock-api.js';
 import { Game } from './game.js';
 
 export function createTriviaServer(api, { origin = 'http://127.0.0.1:3000' } = {}) {
+  const publicUrl = new URL(origin);
+  const allowedOrigins = new Set([publicUrl.origin]);
+  if (['localhost', '127.0.0.1', '[::1]'].includes(publicUrl.hostname)) {
+    for (const hostname of ['localhost', '127.0.0.1', '[::1]']) {
+      const alias = new URL(publicUrl);
+      alias.hostname = hostname;
+      allowedOrigins.add(alias.origin);
+    }
+  }
   const rooms = new Map();
   const reservations = new Set();
   const server = http.createServer(async (req, res) => {
-    if (req.url !== '/') { res.writeHead(404).end(); return; }
-    res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.setHeader('Cache-Control', 'no-store');
-    res.end(await readFile(new URL('./public/index.html', import.meta.url)));
+    const assets = { '/': ['index.html', 'text/html'], '/app.js': ['app.js', 'text/javascript'], '/styles.css': ['styles.css', 'text/css'] };
+    const asset = Object.hasOwn(assets, req.url) ? assets[req.url] : null;
+    if (!asset || !['GET', 'HEAD'].includes(req.method)) { res.writeHead(404).end(); return; }
+    try {
+      const body = await readFile(new URL(`./public/${asset[0]}`, import.meta.url));
+      res.setHeader('Content-Type', `${asset[1]}; charset=utf-8`);
+      res.setHeader('Cache-Control', 'no-store');
+      res.end(req.method === 'HEAD' ? undefined : body);
+    } catch { res.writeHead(500).end('Unable to load the game.'); }
   });
   const wss = new WebSocketServer({ noServer: true, maxPayload: 8192 });
   server.on('upgrade', (req, socket, head) => {
-    if (req.url !== '/play' || req.headers.origin !== origin) { socket.destroy(); return; }
+    if (req.url !== '/play') { socket.end('HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n'); return; }
+    if (!allowedOrigins.has(req.headers.origin)) {
+      console.warn('WebSocket origin rejected:', JSON.stringify(req.headers.origin), 'Allowed:', [...allowedOrigins].join(', '));
+      socket.end('HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n');
+      return;
+    }
     wss.handleUpgrade(req, socket, head, ws => wss.emit('connection', ws));
   });
   function send(ws, data) { if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(data)); }
-  function broadcast(room) { for (const ws of wss.clients) if (ws.room === room) send(ws, { state: room.game.snapshot() }); }
+  function broadcast(room) { for (const ws of wss.clients) if (ws.room === room) send(ws, { state: { ...room.game.snapshot(), hasAnswered: room.game.answers.has(ws.user?.username) } }); }
   async function publishCount(room) {
     if (room.closing) return;
     try {
@@ -58,8 +77,10 @@ export function createTriviaServer(api, { origin = 'http://127.0.0.1:3000' } = {
       if (ws.busy) return send(ws, { error: 'Previous action is still running.' });
       if (Date.now() - ws.lastAction < 1100) return send(ws, { error: 'Wait one second between actions.' });
       ws.lastAction = Date.now(); ws.busy = true;
+      let requestId;
       try {
         const m = JSON.parse(raw);
+        requestId = m.id;
         if (m.action === 'login' || m.action === 'register') {
           if (ws.token) throw new Error('Sign out first');
           if (typeof m.username !== 'string' || !/^[a-zA-Z0-9_]{3,24}$/.test(m.username) || typeof m.password !== 'string' || m.password.length < 8 || Buffer.byteLength(m.password, 'utf8') > 72) throw new Error('Use a 3–24 character username and an 8–72 character password');
@@ -106,7 +127,7 @@ export function createTriviaServer(api, { origin = 'http://127.0.0.1:3000' } = {
           } else throw new Error('Unknown action');
         }
       } catch (error) { send(ws, { error: error.message }); }
-      finally { ws.busy = false; reservations.delete(ws.reserved); ws.reserved = null; if (ws.readyState === WebSocket.CLOSED) cleanup(); }
+      finally { if (requestId !== undefined) send(ws, { done: requestId }); ws.busy = false; reservations.delete(ws.reserved); ws.reserved = null; if (ws.readyState === WebSocket.CLOSED) cleanup(); }
     });
     let cleaned = false;
     async function cleanup() {
@@ -124,5 +145,5 @@ if (process.argv[1] === new URL(import.meta.url).pathname) {
   await api.health();
   const port = Number(process.env.PORT || 3000);
   const { server } = createTriviaServer(api, { origin: process.env.PUBLIC_ORIGIN || `http://127.0.0.1:${port}` });
-  server.listen(port, '127.0.0.1', () => console.log(`Trivia: http://127.0.0.1:${port} (${mock ? 'MOCK — no real API calls' : 'real API'})`));
+  server.listen(port, process.env.HOST || '127.0.0.1', () => console.log(`Trivia: ${process.env.PUBLIC_ORIGIN || `http://127.0.0.1:${port}`} (${mock ? 'MOCK — no real API calls' : 'real API'})`));
 }
