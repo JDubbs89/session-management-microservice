@@ -1,5 +1,3 @@
-DROP TABLE IF EXISTS user_friend_transactions;
-
 CREATE TABLE user_friend_transactions (
     id SERIAL PRIMARY KEY,
     sender_id TEXT NOT NULL,

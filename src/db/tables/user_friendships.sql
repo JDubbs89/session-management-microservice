@@ -1,5 +1,3 @@
-DROP TABLE IF EXISTS user_friendships;
-
 CREATE TABLE user_friendships (
     id SERIAL PRIMARY KEY,
     friend_1_id TEXT NOT NULL,

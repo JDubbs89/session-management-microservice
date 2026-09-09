@@ -1,5 +1,3 @@
-DROP TABLE IF EXISTS user_sessions;
-
 CREATE TABLE user_sessions (
     id SERIAL PRIMARY KEY,
     session_code INT UNIQUE NOT NULL, -- For session lookup and host-agnostic join

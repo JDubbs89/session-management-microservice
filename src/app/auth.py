@@ -63,7 +63,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
 
 
     # Check that db user role matches token role to prevent tampering
-    if user["role"] != role:
+    if user["role"] != role or payload.get("ver") != user.get("token_version", 0):
         raise credentials_exception
 
     return user

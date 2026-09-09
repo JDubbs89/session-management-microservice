@@ -1,11 +1,11 @@
 // Explicitly in-memory demo adapter; never a substitute for API integration tests.
-import { randomUUID } from 'node:crypto';
+import { randomUUID, randomBytes, createHmac } from 'node:crypto';
 export class MockApi {
-  constructor() { this.users = new Map(); this.tokens = new Map(); this.sessions = new Map(); }
+  constructor() { this.secret = randomBytes(32); this.users = new Map(); this.tokens = new Map(); this.sessions = new Map(); }
   async health() { return { status: 'mock' }; }
-  user(token) { const u = this.users.get(this.tokens.get(token)); if (!u) throw new Error('Unauthenticated'); return u; }
+  user(token) { const session = this.tokens.get(token); const u = session && session.exp > Date.now() ? this.users.get(session.username) : null; if (!u) throw new Error('Unauthenticated'); return u; }
   async register(u) { if (this.users.has(u.username)) throw new Error('Username taken'); this.users.set(u.username, { ...u, role: 'user' }); return { username: u.username, user_id: u.user_id, role: 'user' }; }
-  async login(name, password) { const u = this.users.get(name); if (!u || u.password !== password) throw new Error('Invalid credentials'); const token = randomUUID(); this.tokens.set(token, name); return { access_token: token }; }
+  async login(name, password) { const u = this.users.get(name); if (!u || u.password !== password) throw new Error('Invalid credentials'); const exp = Math.floor(Date.now() / 1000) + 1800; const header = Buffer.from(JSON.stringify({alg:'HS256',typ:'JWT'})).toString('base64url'); const payload = Buffer.from(JSON.stringify({sub:name,exp,jti:randomUUID()})).toString('base64url'); const input = `${header}.${payload}`; const token = `${input}.${createHmac('sha256',this.secret).update(input).digest('base64url')}`; this.tokens.set(token, { username: name, exp: exp * 1000 }); return { access_token: token }; }
   async me(t) { const { username, user_id, role } = this.user(t); return { username, user_id, role }; }
   async logout(t) { this.user(t); this.tokens.delete(t); }
   async deleteMe(t) { const u = this.user(t); this.users.delete(u.username); this.tokens.delete(t); }

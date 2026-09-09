@@ -1,5 +1,3 @@
-DROP TABLE IF EXISTS users;
-
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     user_id TEXT UNIQUE NOT NULL, -- Unique identifier for the user

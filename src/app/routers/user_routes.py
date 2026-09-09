@@ -75,7 +75,7 @@ def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), db
 
     # Creates an access token with the user's name and role
     access_token = create_access_token(
-        data={"sub": user["username"], "role": user["role"]},
+        data={"sub": user["username"], "role": user["role"], "ver": user.get("token_version", 0)},
         expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
 
     log_in_user(db, user["username"], user["hashed_password"])

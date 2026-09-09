@@ -5,6 +5,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import DBAPIError
 from models import UserSession, BeaconMetadata
 from crud_user import get_user_by_username
+from core.errors import database_error
 
 
 def _execute(db, sql, params):
@@ -12,7 +13,7 @@ def _execute(db, sql, params):
         return db.execute(text(sql), params)
     except DBAPIError as exc:
         db.rollback()
-        raise HTTPException(status_code=400, detail="Session operation failed") from exc
+        raise database_error(db, exc) from exc
 
 
 def _session(row):
