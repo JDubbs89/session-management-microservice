@@ -1,8 +1,18 @@
 # Node.js WebSocket trivia example
 
-This folder also contains a service-directory example. The default is trivia. Choose the directory example with `npm run directory` after provisioning a service, or set `EXAMPLE=directory` and `SERVICE_CREDENTIAL` for the Docker stack.
+This folder contains two runnable examples. Trivia is the default; the service-directory console is selected explicitly with `EXAMPLE=directory`.
 
 The browser connects only to the Node game server. Node reads API bearer tokens from an HttpOnly cookie, calls the Python API for accounts and session discovery, and owns room membership, questions and scoring. Correct answers never travel to the browser. This is a local teaching example, with four players and three questions per room.
+
+## Choose a demo
+
+| Demo                    | Local command                                     | Purpose                                                              |
+| ----------------------- | ------------------------------------------------- | -------------------------------------------------------------------- |
+| Trivia game             | `npm run demo`                                    | Four-player WebSocket game using the in-memory mock API              |
+| Trivia game against API | `SESSION_API_URL=http://127.0.0.1:8000 npm start` | Legacy player and session integration                                |
+| Service directory       | `SERVICE_CREDENTIAL=... npm run directory`        | `/v1` service, player, room, membership, lease, and close operations |
+
+`npm start` also defaults to trivia when `EXAMPLE` is unset. The directory demo requires a service credential because `/v1` endpoints use service authentication, not player JWTs. Provision one with `npm run directory-operator` as described below, then export the credential in the same shell before starting the directory server.
 
 ## Run the complete demo with Docker
 
@@ -60,6 +70,22 @@ unset ADMIN_USERNAME ADMIN_PASSWORD
 ```
 
 Bootstrap only once. The operator uses the game's internal API URL and removes its temporary administrator when finished.
+
+To switch the Docker stack to the directory console, create a service credential against the running Compose API, then recreate only the game container with that credential:
+
+```sh
+read -r -p 'Admin username: ' ADMIN_USERNAME
+read -r -s -p 'Admin password: ' ADMIN_PASSWORD
+export ADMIN_USERNAME ADMIN_PASSWORD
+docker-compose -f example-implementation/docker-compose.yml exec -e ADMIN_USERNAME -e ADMIN_PASSWORD game npm run directory-operator
+unset ADMIN_USERNAME ADMIN_PASSWORD
+read -r -s -p 'Service credential: ' SERVICE_CREDENTIAL
+export SERVICE_CREDENTIAL
+EXAMPLE=directory docker-compose -f example-implementation/docker-compose.yml up --build -d --wait game
+unset SERVICE_CREDENTIAL
+```
+
+The directory operator prints a service credential once. Keep it available for the `up` command; it is not recoverable from the API after creation. Return to trivia with `EXAMPLE=trivia docker-compose -f example-implementation/docker-compose.yml up --build -d --wait game`, or omit `EXAMPLE` because trivia is the default. Run `docker-compose ... down` when changing modes if you also want to stop the other containers.
 
 ## Run without Docker
 
@@ -121,18 +147,19 @@ The existing friend-named routes also discover public rooms; this example does n
 
 ## Service directory example
 
-This is a second runnable implementation for the `/v1` service API. It keeps the service credential on the Node server and provides a small room operations console at the same port. The console can provision players, create and discover public rooms, inspect room membership, renew leases, and close rooms. The server also exposes the join, leave, and ban calls at `/api/rooms/:room_id/{join,leave,ban}` for a game integration to use with a provisioned `player_id`.
+This is a second runnable implementation for the `/v1` service API. It keeps the service credential on the Node server and provides a guided room operations console at the same port. Provision a player first, then create or select a room. From the selected room, inspect membership, admit/remove/ban the selected player, renew the lease, or close the room. The server also exposes the join, leave, and ban calls at `/api/rooms/:room_id/{join,leave,ban}` for a game integration to use with a provisioned `player_id`.
 
 Against a running API, provision a disposable service and player with an existing administrator:
 
 ```sh
 cd example-implementation
+export SESSION_API_URL=http://127.0.0.1:8000
 ADMIN_USERNAME=admin ADMIN_PASSWORD='your-password' npm run directory-operator
 export SERVICE_CREDENTIAL='credential-printed-by-the-command'
-SESSION_API_URL=http://127.0.0.1:8000 npm run directory
+npm run directory
 ```
 
-The operator calls service creation, credential rotation, player creation, and the administrator grant endpoint. The console calls every service room and player endpoint through the server-side `SessionApi`, including idempotent membership and ban operations. The credential is never sent to browser JavaScript.
+The operator calls service creation, credential rotation, player creation, and the administrator grant endpoint. It prints the credential once; keep it in a secret store or environment variable. The console calls every service room and player endpoint through the server-side `SessionApi`, including idempotent membership and ban operations. The credential is never sent to browser JavaScript.
 
 ## Validation and limits
 
