@@ -1,0 +1,28 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Session API Trivia</title>
+<style>body{font:18px system-ui;max-width:850px;margin:40px auto;padding:0 20px;background:#142136;color:#edf2fa}input,button{font:inherit;padding:8px;margin:4px}button{cursor:pointer}section{border:1px solid #64748b;border-radius:12px;padding:16px;margin:16px 0}#log{white-space:pre-wrap}small{display:block}</style>
+<h1>Server-hosted trivia</h1><p>The Node.js server owns game state and calls the session API. Open a second browser window for another player.</p>
+<section><h2>Account</h2><input id="username" placeholder="Username" autocomplete="username"><input id="password" type="password" placeholder="Password" autocomplete="current-password"><button data-action="register">Register & sign in</button><button data-action="login">Sign in</button><button data-action="logout">Sign out</button><button id="delete">Delete my account</button><p id="identity">Signed out</p></section>
+<section><h2>Find a room</h2><button data-action="host">Host trivia</button><input id="host" placeholder="Host username"><button data-action="preview" data-kind="host">Preview host</button><button data-action="join">Join host</button><input id="code" placeholder="Session code" inputmode="numeric"><button data-action="preview" data-kind="code">Preview code</button><button data-action="leave">Leave / close room</button><small>Wait at least one second between actions. A host closes the room by leaving.</small></section>
+<section><h2 id="title">Lobby</h2><p id="question">Host or join a room to play.</p><div id="choices"></div><p id="scores"></p><button data-action="next">Host: start / next / results</button></section>
+<p role="status" id="log">Connecting…</p>
+<script>
+const ws = new WebSocket(`${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/play`);
+const el = id => document.getElementById(id);
+function send(message) { if(ws.readyState === 1) ws.send(JSON.stringify(message)); }
+document.querySelectorAll('[data-action]').forEach(button => button.onclick = () => {
+  const message = {action:button.dataset.action};
+  if(['register','login'].includes(message.action)){message.username=el('username').value;message.password=el('password').value;el('password').value='';}
+  if(message.action==='join'||button.dataset.kind==='host') message.host=el('host').value;
+  if(button.dataset.kind==='code') message.code=el('code').value;
+  send(message);
+});
+el('delete').onclick = () => {if(confirm('Permanently delete this demo account?'))send({action:'delete_me'});};
+ws.onmessage = event => {
+ const data=JSON.parse(event.data);
+ if('user' in data)el('identity').textContent=data.user?`Signed in as ${data.user.username}`:'Signed out';
+ if('state' in data && data.state === null){el('title').textContent='Lobby';el('question').textContent='Host or join a room to play.';el('choices').replaceChildren();el('scores').textContent='';}
+ if(data.state){const s=data.state;el('title').textContent=`Room ${s.code} · host ${s.host}`;el('question').textContent=s.finished?'Final scores!':s.question?.text||'Waiting for host to start';el('choices').replaceChildren();s.question?.choices.forEach((choice,index)=>{const b=document.createElement('button');b.textContent=choice;b.onclick=()=>send({action:'answer',choice:index});el('choices').append(b);});el('scores').textContent=s.scores.map(p=>`${p.name}: ${p.score}`).join(' · ')+` (${s.answered} answered)`;}
+ if(data.error||data.notice||data.preview)el('log').textContent=data.error||data.notice||JSON.stringify(data.preview,null,2);
+};
+ws.onclose=()=>el('log').textContent='Disconnected. Refresh to sign in again.';
+</script></html>

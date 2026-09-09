@@ -3,16 +3,15 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from datetime import timedelta
 import os
-import os
 from core.limiter import limiter
 from database import get_db
 from models import UserCreate, UserDelete, User, Token
 from auth import create_access_token, require_role
 from crud_user import (
-    create_user, 
-    get_user_by_username, 
-    delete_user, verify_password, 
-    log_out_user, 
+    create_user,
+    get_user_by_username,
+    delete_user, verify_password,
+    log_out_user,
     log_in_user
     )
 
@@ -32,7 +31,7 @@ ROLE_USER = "user"
 def register(request: Request, user: UserCreate, db: Session = Depends(get_db)):
     create_user(db, user.user_id, user.steam_id, user.username, user.password)
     out_user = get_user_by_username(db, user.username)
-    
+
     return User(user_id=out_user["user_id"], username=out_user["username"], role=out_user["role"])
 
 
@@ -42,7 +41,7 @@ def register(request: Request, user: UserCreate, db: Session = Depends(get_db)):
 def register_admin(request: Request, user: UserCreate, db: Session = Depends(get_db), admin = Depends(require_role("admin"))):
     create_user(db, user.user_id, user.steam_id, user.username, user.password, role="admin")
     out_user = get_user_by_username(db, user.username)
-    
+
     return User(user_id=out_user["user_id"], username=out_user["username"], role=out_user["role"])
 
 
@@ -57,9 +56,11 @@ def get_me(request: Request, current_user=Depends(require_role("user", "admin"))
 @router.get("/get_user", response_model=User)
 @limiter.limit("1/second")
 def get_user(request: Request, target_username: str, db: Session = Depends(get_db), current_user=Depends(require_role("admin")), ):
-    
+
     user = get_user_by_username(db, target_username)
-    
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
     return User(user_id=user["user_id"], username=user["username"], role=user["role"])
 
 
@@ -71,14 +72,14 @@ def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), db
     user = get_user_by_username(db, form_data.username)
     if not user or not verify_password(form_data.password, user["hashed_password"]):
         raise HTTPException(status_code=401, detail="Invalid credentials")
-    
+
     # Creates an access token with the user's name and role
     access_token = create_access_token(
-        data={"sub": user["username"], "role": user["role"]}, 
+        data={"sub": user["username"], "role": user["role"]},
         expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
-    
+
     log_in_user(db, user["username"], user["hashed_password"])
-    
+
     return Token(access_token=access_token, token_type="bearer")
 
 
@@ -92,12 +93,12 @@ def logout(request: Request, db: Session = Depends(get_db), current_user=Depends
 @router.delete("/delete")
 @limiter.limit("1/second")
 def delete(request: Request, user: UserDelete, db: Session = Depends(get_db), current_user=Depends(require_role("admin"))):
-    
+
     delete_user(db, user.username, user.password, current_user["username"], current_user["hashed_password"])
-    
+
 
 @router.delete("/delete_me")
 @limiter.limit("1/second")
 def delete_me(request: Request, db: Session = Depends(get_db), current_user=Depends(require_role("user", "admin"))):
-   
-    delete_user(db, current_user["username"], current_user["hashed_password"], current_user["username"], current_user["hashed_password"])
+
+    delete_user(db, current_user["username"], None, current_user["username"], current_user["hashed_password"])

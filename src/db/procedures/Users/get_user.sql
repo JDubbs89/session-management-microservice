@@ -35,7 +35,7 @@ DECLARE
     _result users%ROWTYPE;
 BEGIN
 
-    SELECT * INTO _result FROM users WHERE steam_id = _steam_id LIMIT 1;
+    SELECT * INTO _result FROM users WHERE user_steam_id = _steam_id LIMIT 1;
     IF _result IS NULL
     THEN
         RAISE EXCEPTION 'User not found';

@@ -20,6 +20,6 @@ pydantic
 # Dotenv integration
 python-dotenv
 
-# Passlib and Python-jose for password hashing and JWT creation/validation
-passlib[bcrypt]
+# Bcrypt and Python-jose for password hashing and JWT creation/validation
+bcrypt>=4,<6
 python-jose[cryptography]

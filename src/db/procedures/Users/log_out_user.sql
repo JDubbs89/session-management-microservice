@@ -4,7 +4,7 @@ RETURNS VOID AS $$
 DECLARE
     _user RECORD;
 BEGIN
-    
+
     SELECT * INTO _user FROM users WHERE user_id = _user_id AND hashed_password = _hashed_password LIMIT 1;
     IF _user IS NULL
     THEN
@@ -19,7 +19,7 @@ BEGIN
     UPDATE users
     SET user_online = FALSE,
     last_activity = CURRENT_TIMESTAMP
-    WHERE user_id = _user_id AND _hashed_password = _hashed_password;
+    WHERE user_id = _user_id AND hashed_password = _hashed_password;
 
 END;
 $$ LANGUAGE plpgsql;

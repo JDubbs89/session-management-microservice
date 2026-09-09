@@ -28,17 +28,4 @@
 \i /docker-entrypoint-initdb.d/procedures/Users/log_out_user.sql
 \i /docker-entrypoint-initdb.d/procedures/Users/log_out_inactive_users.sql
 
--- Create Generic Admin User (Testing)
-SELECT create_new_user("admin", "123456789", "admin", "", "admin");
-
--- Import Sample Data (Testing Only)
---\i /docker-entrypoint-initdb.d/seed/sample_data.sql
---\i /docker-entrypoint-initdb.d/seed/default_users.sql
-
--- Install pg_cron extension
---CREATE EXTENSION IF NOT EXISTS pg_cron;
-
--- Schedule the user offline job (runs every minute)
---SELECT cron.schedule('update-offline-users', '* * * * *', 
-    --'SELECT log_out_inactive_users();'
---);
+-- Bootstrap the first administrator with app/bootstrap_admin.py.

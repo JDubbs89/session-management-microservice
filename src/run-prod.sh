@@ -1,10 +1,4 @@
-#!/bin/bash
-
-echo "🛡️ Switching to production environment..."
-
-# Copy or symlink production .env file
-cp .env.production .env
-
-# Clean and rebuild
-docker-compose down -v
-docker-compose up --build
+#!/usr/bin/env bash
+set -euo pipefail
+cd -- "$(dirname -- "$0")"
+exec docker compose --env-file "${ENV_FILE:-.env}" up --build -d

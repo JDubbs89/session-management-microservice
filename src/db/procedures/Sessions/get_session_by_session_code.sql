@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION get_session_by_session_code(_session_code TEXT, _user_username TEXT, _session_passcode TEXT DEFAULT '')
+CREATE OR REPLACE FUNCTION get_session_by_session_code(_session_code INT, _user_username TEXT, _session_passcode TEXT DEFAULT '')
 RETURNS user_sessions AS $$
 DECLARE
     _username TEXT;
@@ -33,17 +33,17 @@ BEGIN
     SELECT * INTO _session FROM user_sessions WHERE host_username = _username;
 
     -- Check if the requesting user is blacklisted
-    IF _user_username = ANY (SELECT json_array_elements_text(_session.session_blacklist)) THEN
+    IF _user_username = ANY (SELECT json_array_elements_text(_session.session_blacklist::json)) THEN
         RAISE EXCEPTION 'User is blacklisted from this session';
     END IF;
 
     -- Check if the session is private, and if so, if the requesting user is whitelisted
-    IF _session.allow_join = 'private' AND _user_username != ALL (SELECT json_array_elements_text(_session.session_whitelist)) THEN
+    IF _session.allow_join = 'private' AND _user_username != ALL (SELECT json_array_elements_text(_session.session_whitelist::json)) THEN
         RAISE EXCEPTION 'Session is private and user is not whitelisted';
     END IF;
 
     -- If not private, check if session is friends only, and if so, if the requesting user is friends with the host or whitelisted
-    IF _session.allow_join = 'friends only' AND _user_username != ALL (SELECT json_array_elements_text(_session.session_whitelist)) THEN
+    IF _session.allow_join = 'friends only' AND _user_username != ALL (SELECT json_array_elements_text(_session.session_whitelist::json)) THEN
         IF NOT EXISTS (
             SELECT 1
             FROM user_friendships
@@ -54,7 +54,7 @@ BEGIN
         END IF;
     END IF;
 
-    IF _session.session_passcode != _session_passcode AND _user_username != ALL (SELECT json_array_elements_text(_session.session_whitelist)) THEN
+    IF _session.session_passcode != _session_passcode AND _user_username != ALL (SELECT json_array_elements_text(_session.session_whitelist::json)) THEN
         IF NOT EXISTS (
             SELECT 1
             FROM user_friendships
@@ -99,7 +99,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION does_session_exist(_session_code TEXT)
+CREATE OR REPLACE FUNCTION does_session_exist(_session_code INT)
 RETURNS BOOLEAN AS $$
 DECLARE
     _exists BOOLEAN;

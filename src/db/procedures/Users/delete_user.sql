@@ -10,14 +10,15 @@ BEGIN
         RAISE EXCEPTION 'Executing User not found';
     END IF;
 
-    IF NOT _executor_name = _name AND _executor_hashed_password = _hashed_password
+    IF _executor_name != _name
     THEN
-        IF NOT EXISTS (SELECT 1 FROM users WHERE username = _executor_name AND hashed_password = _executor_hashed_password AND user_role = 'admin') 
+        IF NOT EXISTS (SELECT 1 FROM users WHERE username = _executor_name AND hashed_password = _executor_hashed_password AND user_role = 'admin')
         THEN
             RAISE EXCEPTION 'Insufficient permissions or incorrect password';
         END IF;
     END IF;
 
+    DELETE FROM user_sessions WHERE host_username = _name;
     DELETE FROM users WHERE username = _name AND hashed_password = _hashed_password;
 END;
 $$ LANGUAGE plpgsql;

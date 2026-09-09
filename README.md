@@ -1,175 +1,88 @@
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![project_license][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
+# Session Management Microservice
 
+A FastAPI/PostgreSQL service for accounts, presence, and session discovery used by server-based applications, including Node.js WebSocket games.
 
-<br />
-<div align="center">
-  <a href="https://github.com/JDubbs89/session-management-microservice">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
-  </a>
+```mermaid
+flowchart LR
+    Browser[Player browser] <-->|WebSocket gameplay| Game[Node.js game server]
+    Game -->|HTTP API and player JWT| API[FastAPI]
+    API --> DB[(PostgreSQL)]
+```
 
-<h3 align="center">Session Management Microservice</h3>
+The game server owns gameplay, rooms, membership, timers, and scoring. This API stores accounts and discoverable session records. Browsers use the game server; they do not need direct database or API access. The current API authenticates player JWTs; scoped service identities and multi-room server ownership are planned in [ToDo.md](ToDo.md).
 
-  <p align="center">
-    A lightweight, robust game session management microservice.
-    <br />
-    <a href="https://github.com/JDubbs89/session-management-microservice/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
-    &middot;
-    <a href="https://github.com/JDubbs89/session-management-microservice/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
-  </p>
-</div>
+## Current scope
 
+- User registration, login, profile lookup, presence logout, and account deletion.
+- Admin-only user creation, lookup, and deletion.
+- Session creation, host/code discovery, updates, and deletion.
+- A [Node.js WebSocket trivia example](example-implementation/) with player workflows and a separate administrator endpoint exercise.
 
-<details>
-  <summary>Table of Contents</summary>
-  <ol>
-    <li>
-      <a href="#about-the-project">About The Project</a>
-      <ul>
-        <li><a href="#built-with">Built With</a></li>
-      </ul>
-    </li>
-    <li>
-      <a href="#getting-started">Getting Started</a>
-      <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
-      </ul>
-    </li>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
-  </ol>
-</details>
+Friendship and messaging router files are placeholders, not available endpoints. Legacy Steam fields and `beacon_metadata` remain for compatibility. Logout marks the account offline and rejects protected requests while offline. It does not permanently revoke a JWT; an unexpired token can become usable again after another login. This is a development baseline; the roadmap tracks service authentication, migrations, access-policy hardening, and release checks.
 
-## About the Project
-This project is a session management microservice designed for interacting with P2P session systems in multiplayer games. Games should interact with the API server to create, read, update, and delete user, session, and message data held within the database container. This project is meant to be a lightweight and self-contained solution for games that utilize P2P multiplayer, but don't want/need to implement relay server overhead.
+## Local setup
 
-### Features
-- JWT and OAuth2 authentication
-- Password hashing with B-Crypt
-- Rate Limiting and input validation/sanitation
-- User login status, last activity data
-- User friendships, messages (W.I.P.), and session data
-- Comprehensive and dynamic test cases (W.I.P.)
+Requirements: Docker Engine with Docker Compose, and Node.js 22 or newer for the example.
 
-### Built With
+From the repository root:
 
-* [![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=fff)](#)
-* [![FastAPI](https://img.shields.io/badge/FastAPI-009485.svg?logo=fastapi&logoColor=white)](#)
-* [![Postgres](https://img.shields.io/badge/Postgres-%23316192.svg?logo=postgresql&logoColor=white)](#)
-* [![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=fff)](#)
-* [![JSON](https://img.shields.io/badge/JSON-000?logo=json&logoColor=fff)](#)
-* [![Postman](https://img.shields.io/badge/Postman-FF6C37?logo=postman&logoColor=white)](#)
-* [![OpenAPI](https://img.shields.io/badge/OpenAPI-6BA539?logo=openapiinitiative&logoColor=white)](#)
-* [![Swagger](https://img.shields.io/badge/Swagger-85EA2D?logo=insomnia&logoColor=000)](#)
+```sh
+cp .env.example src/.env
+# Edit src/.env and replace SECRET_KEY with a random secret.
+docker compose --env-file src/.env -f src/docker-compose.yml up --build
+```
 
-### API
-FastAPI spearheads the API layer. The API makes use of CRUD functionality powered by SQLAlchemy. Pydantic provides data models critical for input validation/sanitation. The login endpoint utilizes BCrypt to hash the password before sending it to the database, and returns a JWT upon authentication for future logins. SlowAPI handles rate limiting based on network address, safeguarding against brute force/DDoS attacks.
+The API listens on `http://localhost:8000`. Interactive API documentation is at `/docs`, and the machine-readable contract is at `/openapi.json`. `GET /` reports process liveness, not database readiness.
 
-### Database
-PostgreSQL is the database of choice in this project. The DB makes use of stored procedures to provide CRUD functionality without allowing the client access to the database. On top of using stored procedures, each operation thoroughly validates the executing user based on criteria such as session ownership, friendship status, etc. to ensure data privacy and security.
+PostgreSQL initialization runs only on an empty data volume. SQL edits do not migrate an existing database; use a separate fresh development database to test initialization. Preserve existing volumes and data.
 
-## Getting Started (UNDER CONSTRUCTION)
+Create the first administrator from a trusted local shell when testing admin-only routes. The command prompts for a password and refuses to run if an administrator already exists:
 
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
+```sh
+docker compose --env-file src/.env -f src/docker-compose.yml exec api python bootstrap_admin.py --username trivia-service
+```
 
-### Prerequisites (UNDER CONSTRUCTION)
+For the game setup, player walkthrough, endpoint coverage, and operator workflow, follow [the example README](example-implementation/README.md).
 
-This is an example of how to list things you need to use the software and how to install them.
-* npm
-  ```sh
-  npm install npm@latest -g
-  ```
+## API contract
 
-### Installation (UNDER CONSTRUCTION)
+Protected routes require `Authorization: Bearer <player-token>`. Login uses an OAuth2 form body; registration and session requests use JSON. The existing session-create request has two nested objects, `session` and `beacon_metadata`; refer to `/docs` or the example API client for exact fields.
 
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
-   ```sh
-   git clone https://github.com/github_username/repo_name.git
-   ```
-3. Install NPM packages
-   ```sh
-   npm install
-   ```
-4. Enter your API in `config.js`
-   ```js
-   const API_KEY = 'ENTER YOUR API';
-   ```
-5. Change git remote url to avoid accidental pushes to base project
-   ```sh
-   git remote set-url origin github_username/repo_name
-   git remote -v # confirm the changes
-   ```
+| Capability | Routes |
+| --- | --- |
+| Liveness | `GET /` |
+| Accounts | `POST /users/register`, `POST /users/login`, `GET /users/me`, `POST /users/logout`, `DELETE /users/delete_me` |
+| Administration | `POST /users/register_admin`, `GET /users/get_user`, `DELETE /users/delete` |
+| Sessions | `POST /sessions/create`, `GET /sessions/read_friend_session`, `GET /sessions/read_friend_session_data`, `GET /sessions/read_session_data`, `PUT /sessions/update`, `DELETE /sessions/delete` |
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+The `read_friend_session` names are legacy host lookup routes; actual access depends on the stored session policy. An HTTP route for creating friendships does not yet exist. Automatic FastAPI documentation routes are not gameplay endpoints.
 
+## Tests
 
+Run the backend regression tests (database calls are substituted; these do not validate PostgreSQL initialization):
 
-## Usage
+```sh
+python3 -m venv .venv
+.venv/bin/pip install -r src/requirements-test.txt
+.venv/bin/python -m pytest src/tests
+```
 
-Below is a basic flowchart outlining the process by which a game client sends HTTP requests to the API, which in turn performs CRUD operations on the database.
+Run the example tests:
 
-<a href="https://github.com/JDubbs89/session-management-microservice">
-    <img src="images/microserviceflowchart.png" alt="Flowchart" width="160" height="80">
-</a>
+```sh
+cd example-implementation
+npm ci
+npm test
+```
 
-In this specific instance, Player 1 begins hosting a session, notifying the microservice via HTTP post request containing relevant session data. Player 2 want to see if player 1 is hosting a session and retrieve that relevant data if possible. Both requests go through authentication on both the API side and database side for security reasons.
+The example README also describes mock mode and the live API walkthrough. A successful mock test does not establish database integration correctness.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+## Development priorities
 
+[ToDo.md](ToDo.md) records prioritized work and acceptance criteria for completing the API, making trusted server-based services first-class, implementing or deferring unfinished social features, and establishing integration and release testing.
 
-
-## Roadmap (UNDER CONSTRUCTION)
-
-- [ ] Feature 1
-- [ ] Feature 2
-- [ ] Feature 3
-    - [ ] Nested Feature
-
-See the [open issues](https://github.com/github_username/repo_name/issues) for a full list of proposed features (and known issues).
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+Keep the API and database on a private network in a server deployment, with the game server as the player-facing entry point. The local example is intended for development and API evaluation.
 
 ## License
 
-Distributed under the MIT License. See `LICENSE.txt` for more information.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## Contact
-
-Jonathan Warner - jdwarner8989@gmail.com
-
-Project Link: [https://github.com/github_username/session-management-microservice](https://github.com/github_username/session-management-microservice)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## Acknowledgments
-
-* [ArjanCodes - Youtube](https://www.youtube.com/@ArjanCodes)
-* [W3Schools.org](https://www.w3schools.com/)
-* [Postman Blog - How to Build an API](https://blog.postman.com/how-to-build-an-api/)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-[contributors-shield]: https://img.shields.io/github/contributors/JDubbs89/session-management-microservice.svg?style=for-the-badge
-[contributors-url]: https://github.com/JDubbs89/session-management-microservice/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/JDubbs89/session-management-microservice.svg?style=for-the-badge
-[forks-url]: https://github.com/JDubbs89/session-management-microservice/network/members
-[stars-shield]: https://img.shields.io/github/stars/JDubbs89/session-management-microservice.svg?style=for-the-badge
-[stars-url]: https://github.com/JDubbs89/session-management-microservice/stargazers
-[issues-shield]: https://img.shields.io/github/issues/JDubbs89/session-management-microservice.svg?style=for-the-badge
-[issues-url]: https://github.com/JDubbs89/session-management-microservice/issues
-[license-shield]: https://img.shields.io/github/license/JDubbs89/session-management-microservice.svg?style=for-the-badge
-[license-url]: https://github.com/JDubbs89/session-management-microservice/blob/master/LICENSE.txt
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/jonathanwarnercs
+[MIT](LICENSE.txt).
