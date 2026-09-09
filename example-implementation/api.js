@@ -52,4 +52,17 @@ export class SessionApi {
   previewCode(token, session_code) { return this.request('GET', '/sessions/read_session_data', token, null, { session_code }); }
   update(token, session_code, settings_to_update) { return this.request('PUT', '/sessions/update', token, { session_code, session_passcode: '', settings_to_update }); }
   deleteSession(token, session_code, host_username) { return this.request('DELETE', '/sessions/delete', token, null, { session_code, host_username }); }
+  createService(token, service) { return this.request('POST', '/v1/services', token, service); }
+  rotateService(token, serviceId) { return this.request('POST', `/v1/services/${encodeURIComponent(serviceId)}/rotate`, token); }
+  grantPlayer(token, serviceId, playerId) { return this.request('POST', `/v1/services/${encodeURIComponent(serviceId)}/players/${encodeURIComponent(playerId)}`, token); }
+  serviceRequest(method, path, credential, body, query) { return this.request(method, `/v1${path}`, null, body, query, { Authorization: `Service ${credential}` }); }
+  createPlayer(credential, player) { return this.serviceRequest('POST', '/players', credential, player); }
+  createRoom(credential, room) { return this.serviceRequest('POST', '/rooms', credential, room); }
+  listRooms(credential, limit, offset) { return this.serviceRequest('GET', '/rooms', credential, null, { limit, offset }); }
+  getRoom(credential, roomId) { return this.serviceRequest('GET', `/rooms/${encodeURIComponent(roomId)}`, credential); }
+  joinRoom(credential, roomId, playerId) { return this.serviceRequest('POST', `/rooms/${encodeURIComponent(roomId)}/join`, credential, { player_id: playerId }); }
+  leaveRoom(credential, roomId, playerId) { return this.serviceRequest('POST', `/rooms/${encodeURIComponent(roomId)}/leave`, credential, { player_id: playerId }); }
+  banPlayer(credential, roomId, playerId) { return this.serviceRequest('POST', `/rooms/${encodeURIComponent(roomId)}/ban`, credential, { player_id: playerId }); }
+  heartbeatRoom(credential, roomId, version) { return this.serviceRequest('POST', `/rooms/${encodeURIComponent(roomId)}/heartbeat`, credential, { version }); }
+  closeRoom(credential, roomId, version) { return this.serviceRequest('POST', `/rooms/${encodeURIComponent(roomId)}/close`, credential, { version }); }
 }

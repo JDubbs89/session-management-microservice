@@ -1,5 +1,7 @@
 # Node.js WebSocket trivia example
 
+This folder also contains a service-directory example. The default is trivia. Choose the directory example with `npm run directory` after provisioning a service, or set `EXAMPLE=directory` and `SERVICE_CREDENTIAL` for the Docker stack.
+
 The browser connects only to the Node game server. Node reads API bearer tokens from an HttpOnly cookie, calls the Python API for accounts and session discovery, and owns room membership, questions and scoring. Correct answers never travel to the browser. This is a local teaching example, with four players and three questions per room.
 
 ## Run the complete demo with Docker
@@ -13,6 +15,12 @@ docker-compose -f example-implementation/docker-compose.yml up --build -d --wait
 Open **http://127.0.0.1:3000** in two separate browser profiles and follow the player walkthrough below. The equivalent `localhost` address also works; WebSocket Origin validation accepts loopback aliases on the configured port. No local Python, Node, or environment file is needed for this Docker demo.
 
 The stack runs three containers: PostgreSQL initializes the schema and stored functions on the first boot; the API waits for PostgreSQL; the game waits for API/database readiness. The game uses the real API at `http://api:8000` through Compose service discovery, with mock mode disabled. The API and database have no host ports. The game listens on all interfaces inside its container, with its host port bound only to `127.0.0.1`.
+
+The trivia example is selected by default. To run the service-directory example instead, first provision a service credential as described below, then start Compose with:
+
+```sh
+EXAMPLE=directory SERVICE_CREDENTIAL='credential-printed-by-directory-operator' docker-compose -f example-implementation/docker-compose.yml up --build -d --wait
+```
 
 This stack uses fixed local demo database credentials and a demo signing secret. `DEMO_SECRET_KEY` overrides the signing secret. `DEMO_PUBLIC_ORIGIN` sets an explicit browser origin when using a local reverse proxy (which must forward WebSocket upgrades). Other origins remain rejected. `DEMO_PORT` changes the browser port and allowed origin together, for example:
 
@@ -111,6 +119,21 @@ The operator creates a uniquely named temporary administrator, reads it, deletes
 
 The existing friend-named routes also discover public rooms; this example does not imply that friendship or messaging endpoints exist. Current contracts retain legacy Steam fields; registration generates a unique placeholder identifier. Create uses the API's nested `{session, beacon_metadata}` body and JSON array strings for access lists.
 
+## Service directory example
+
+This is a second runnable implementation for the `/v1` service API. It keeps the service credential on the Node server and provides a small room operations console at the same port. The console can provision players, create and discover public rooms, inspect room membership, renew leases, and close rooms. The server also exposes the join, leave, and ban calls at `/api/rooms/:room_id/{join,leave,ban}` for a game integration to use with a provisioned `player_id`.
+
+Against a running API, provision a disposable service and player with an existing administrator:
+
+```sh
+cd example-implementation
+ADMIN_USERNAME=admin ADMIN_PASSWORD='your-password' npm run directory-operator
+export SERVICE_CREDENTIAL='credential-printed-by-the-command'
+SESSION_API_URL=http://127.0.0.1:8000 npm run directory
+```
+
+The operator calls service creation, credential rotation, player creation, and the administrator grant endpoint. The console calls every service room and player endpoint through the server-side `SessionApi`, including idempotent membership and ban operations. The credential is never sent to browser JavaScript.
+
 ## Validation and limits
 
 ```sh
@@ -121,4 +144,4 @@ Tests cover cookie restoration, logout/deletion, missing/tampered/expired creden
 
 Only the local host can advance questions; membership and answers are checked on the server. Rooms lock when play starts. The host controls question timing, and scores update immediately. Each account gets one active connection. Login and registration use same-origin HTTP routes. Tokens are stored in a host-only, HttpOnly, SameSite=Strict cookie with a lifetime bounded by JWT expiry; HTTPS public origins add Secure. Browser JavaScript never receives the token. Page load restores identity through GET /auth/me, and WebSocket upgrades verify the cookie through the API before accepting gameplay. Auth mutations require a trusted Origin. Refresh and reconnect preserve sign-in and return to the lobby. Disconnect removes local membership; a host disconnect attempts API session deletion and closes the room. Failed remote cleanup is logged and requires operator attention. Token expiry closes the connection and requires sign-in again. Sign-out and deletion clean up active rooms, call the API, clear the cookie, and close account connections. Locally revoked tokens are rejected until expiry. The API also implements persistent account token-version revocation on logout; the live CI suite verifies revocation after a new login, API/database restart, and subsequent API access.
 
-Outside Docker, this defaults to loopback and validates WebSocket Origin (default `http://127.0.0.1:3000`). `HOST`, `PORT`, and `PUBLIC_ORIGIN` customize serving; Compose sets these for container networking. For deployment, put the game and API behind TLS, keep PostgreSQL private, configure explicit trusted origins, inject secrets from a secret manager, and use durable/shared game state with reliable session lease and cleanup handling. This example currently acts on player tokens held server-side; it does not implement a service-account credential flow for the `/v1` API. Do not expose this demo directly to the internet.
+Outside Docker, trivia defaults to loopback and validates WebSocket Origin (default `http://127.0.0.1:3000`). `HOST`, `PORT`, and `PUBLIC_ORIGIN` customize serving; Compose sets these for container networking. For deployment, put the game and API behind TLS, keep PostgreSQL private, configure explicit trusted origins, inject secrets from a secret manager, and use durable/shared game state with reliable session lease and cleanup handling. The directory example uses a server-side service credential and is intended for local integration testing, not direct internet exposure.

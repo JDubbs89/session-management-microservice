@@ -49,6 +49,8 @@ services:
       PUBLIC_ORIGIN: ${DEMO_PUBLIC_ORIGIN:-http://127.0.0.1:${DEMO_PORT:-3000}}
       SESSION_API_URL: http://api:8000
       TRIVIA_MOCK: "0"
+      EXAMPLE: ${EXAMPLE:-trivia}
+      SERVICE_CREDENTIAL: ${SERVICE_CREDENTIAL:-}
     ports:
       - "127.0.0.1:${DEMO_PORT:-3000}:3000"
     depends_on:
