@@ -18,14 +18,20 @@ from sqlalchemy import text
 
 suffix = uuid.uuid4().hex[:10]
 username = 'release_' + suffix
+duplicate_username = username + '_d'
 password = 'isolated-release-password-81!'
 client = httpx.Client(base_url=os.environ.get('SESSION_API_URL', 'http://127.0.0.1:8000'), timeout=15)
 
 def call(method, path, expected, **kwargs):
+    deadline = time.monotonic() + 75
     response = client.request(method, path, **kwargs)
-    if response.status_code == 429:
-        # Earlier suites share the login IP; bounded retry respects the live limiter.
-        time.sleep(min(60, max(1, int(response.headers.get('Retry-After', '2')))))
+    while response.status_code == 429 and time.monotonic() < deadline:
+        # Earlier suites share the login IP; wait for the fixed limiter window.
+        try:
+            retry_after = int(response.headers.get('Retry-After', '1'))
+        except ValueError:
+            retry_after = 1
+        time.sleep(max(1, min(60, retry_after)))
         response = client.request(method, path, **kwargs)
     assert response.status_code == expected, (path, expected, response.status_code, response.text)
     return response
@@ -34,7 +40,7 @@ try:
     identity = {'username': username, 'password': password, 'steam_id': 'release:' + suffix}
     created = call('POST', '/users/register', 201, json=identity).json()
     call('POST', '/users/register', 409, json=identity)
-    call('POST', '/users/register', 409, json=identity | {'username': username + '_duplicate'})
+    call('POST', '/users/register', 409, json=identity | {'username': duplicate_username})
     call('POST', '/users/login', 401, data={'username': username, 'password': 'incorrect-password'})
     token = call('POST', '/users/login', 200, data={'username': username, 'password': password}).json()['access_token']
     claims = jwt.decode(token, settings.secret_key, algorithms=['HS256'])
@@ -70,5 +76,5 @@ try:
 finally:
     # Remove only this invocation's identities, including on assertion failure.
     with engine.begin() as connection:
-        connection.execute(text('DELETE FROM users WHERE username IN (:a,:b)'), {'a': username, 'b': username + '_duplicate'})
+        connection.execute(text('DELETE FROM users WHERE username IN (:a,:b)'), {'a': username, 'b': duplicate_username})
     client.close()
