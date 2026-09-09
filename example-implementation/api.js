@@ -1,23 +1,40 @@
 export class SessionApi {
-  constructor(base = 'http://127.0.0.1:8000', fetcher = fetch) { this.base = base; this.fetcher = fetcher; this.queue = Promise.resolve(); this.lastRequest = 0; this.spacing = fetcher === fetch ? 1100 : 0; }
-  request(method, path, token, body, query) {
-    const run = this.queue.then(async () => {
-      const delay = this.spacing - (Date.now() - this.lastRequest);
-      if (delay > 0) await new Promise(resolve => setTimeout(resolve, delay));
-      this.lastRequest = Date.now();
-      return this.perform(method, path, token, body, query);
+  constructor(base = 'http://127.0.0.1:8000', fetcher = fetch, { timeoutMs = 10000, spacingMs = fetcher === fetch ? 1100 : 0 } = {}) {
+    this.base = base; this.fetcher = fetcher; this.timeoutMs = timeoutMs;
+    this.queues = new Map(); this.lastRequests = new Map(); this.spacing = spacingMs;
+  }
+  request(method, path, token, body, query, extraHeaders) {
+    // Independent users must not wait behind another player's network timeout.
+    const key = token || 'anonymous';
+    const deadline = Date.now() + this.timeoutMs;
+    const run = (this.queues.get(key) || Promise.resolve()).then(async () => {
+      const delay = this.spacing - (Date.now() - (this.lastRequests.get(key) || 0));
+      if (delay > 0) await new Promise(resolve => setTimeout(resolve, Math.min(delay, this.timeoutMs)));
+      const remaining = deadline - Date.now();
+      if (remaining <= 0) throw Object.assign(new Error('Game service timed out. Try again.'), {status: 504});
+      this.lastRequests.set(key, Date.now());
+      return this.perform(method, path, token, body, query, extraHeaders, remaining);
     });
-    this.queue = run.catch(() => {});
+    const settled = run.catch(() => {}).finally(() => {
+      if (this.queues.get(key) === settled) this.queues.delete(key);
+      for (const [principal, timestamp] of this.lastRequests) if (timestamp < Date.now() - 60000) this.lastRequests.delete(principal);
+    });
+    this.queues.set(key, settled);
     return run;
   }
-  async perform(method, path, token, body, query) {
+  async perform(method, path, token, body, query, extraHeaders, timeoutMs = this.timeoutMs) {
     const url = new URL(path, this.base);
     if (query) url.search = new URLSearchParams(query);
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const headers = { ...extraHeaders, ...(token ? { Authorization: `Bearer ${token}` } : {}) };
     if (body) headers['Content-Type'] = body instanceof URLSearchParams ? 'application/x-www-form-urlencoded' : 'application/json';
-    const response = await this.fetcher(url, { method, headers, body: body ? body instanceof URLSearchParams ? body.toString() : JSON.stringify(body) : undefined, signal: AbortSignal.timeout(10000) });
+    let response;
+    try { response = await this.fetcher(url, { method, headers, body: body ? body instanceof URLSearchParams ? body.toString() : JSON.stringify(body) : undefined, signal: AbortSignal.timeout(timeoutMs) }); }
+    catch (error) {
+      const status = ['TimeoutError', 'AbortError'].includes(error.name) ? 504 : 503;
+      throw Object.assign(new Error(status === 504 ? 'Game service timed out. Try again.' : 'Game service unavailable. Try again.'), {status});
+    }
     const data = await response.json().catch(() => null);
-    if (!response.ok) throw new Error(`API ${method} ${path}: ${response.status} ${JSON.stringify(data)}`);
+    if (!response.ok) throw Object.assign(new Error(`API ${method} ${path}: ${response.status}`), { status: response.status, retryAfter: response.headers?.get('retry-after') });
     return data;
   }
   health() { return this.request('GET', '/'); }
@@ -30,9 +47,9 @@ export class SessionApi {
   deleteUser(token, username, password) { return this.request('DELETE', '/users/delete', token, { username, password }); }
   deleteMe(token) { return this.request('DELETE', '/users/delete_me', token); }
   create(token, session, beacon_metadata) { return this.request('POST', '/sessions/create', token, { session, beacon_metadata }); }
-  byHost(token, friend_name, session_passcode = '') { return this.request('GET', '/sessions/read_friend_session', token, null, { friend_name, session_passcode }); }
+  byHost(token, friend_name, session_passcode = '') { return this.request('GET', '/sessions/read_friend_session', token, null, { friend_name }, session_passcode ? { 'X-Session-Passcode': session_passcode } : {}); }
   previewHost(token, friend_name) { return this.request('GET', '/sessions/read_friend_session_data', token, null, { friend_name }); }
   previewCode(token, session_code) { return this.request('GET', '/sessions/read_session_data', token, null, { session_code }); }
   update(token, session_code, settings_to_update) { return this.request('PUT', '/sessions/update', token, { session_code, session_passcode: '', settings_to_update }); }
-  deleteSession(token, session_code, host_username) { return this.request('DELETE', '/sessions/delete', token, null, { session_code, host_username, session_passcode: '' }); }
+  deleteSession(token, session_code, host_username) { return this.request('DELETE', '/sessions/delete', token, null, { session_code, host_username }); }
 }

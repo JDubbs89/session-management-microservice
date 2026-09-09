@@ -9,7 +9,7 @@ flowchart LR
     API --> DB[(PostgreSQL)]
 ```
 
-The game server owns gameplay, rooms, membership, timers, and scoring. This API stores accounts and discoverable session records. Browsers use the game server; they do not need direct database or API access. The current API authenticates player JWTs; scoped service identities and multi-room server ownership are planned in [ToDo.md](ToDo.md).
+The game server owns gameplay, rooms, membership, timers, and scoring. This API stores accounts and discoverable session records. Browsers use the game server; they do not need direct database or API access. The `/v1` API authenticates scoped service credentials and supports tenant-isolated players and multiple rooms per server. The bundled trivia example retains the player-JWT compatibility API. See [service contracts](docs/services.md) and the [transition guide](docs/api-transition.md).
 
 ## Current scope
 
@@ -18,7 +18,7 @@ The game server owns gameplay, rooms, membership, timers, and scoring. This API 
 - Session creation, host/code discovery, updates, and deletion.
 - A [Node.js WebSocket trivia example](example-implementation/) with player workflows and a separate administrator endpoint exercise.
 
-Friendship and messaging router files are placeholders, not available endpoints. Legacy Steam fields and `beacon_metadata` remain for compatibility. Logout marks the account offline and rejects protected requests while offline. It does not permanently revoke a JWT; an unexpired token can become usable again after another login. This is a development baseline; the roadmap tracks service authentication, migrations, access-policy hardening, and release checks.
+Friendship and messaging APIs are explicitly deferred; retained legacy SQL and account cleanup are documented in [the social capability decision](docs/legacy-social.md). Steam is optional; account IDs and neutral subjects are generated server-side. Legacy Steam fields and `beacon_metadata` remain for compatibility. Logout increments the persistent token version, so old JWTs remain revoked after subsequent logins and database restarts. The repository includes a disposable PostgreSQL CI contract suite and a bounded load probe; the load probe reports targets but is not a production capacity claim.
 
 ## Complete Docker demo
 
@@ -32,7 +32,7 @@ Open http://127.0.0.1:3000 in two windows. The game calls the API container dire
 
 ## Local setup
 
-Requirements: Docker Engine with `docker-compose`, and Node.js 22 or newer for the example.
+Requirements: a running, accessible Docker Engine with `docker-compose`. Local development uses Python 3.12 and Node.js 22 or 24. See [setup, configuration, migrations, and backups](docs/operations.md).
 
 From the repository root:
 
@@ -42,9 +42,9 @@ cp .env.example src/.env
 docker-compose --env-file src/.env -f src/docker-compose.yml up --build
 ```
 
-The API listens on `http://localhost:8000`. Interactive API documentation is at `/docs`, and the machine-readable contract is at `/openapi.json`. `GET /` reports process liveness, not database readiness.
+The API listens on `http://localhost:8000`. Interactive API documentation is at `/docs`, and the machine-readable contract is at `/openapi.json`. `GET /` reports process liveness; `/health/ready` checks initialized database tables.
 
-PostgreSQL initialization runs only on an empty data volume. SQL edits do not migrate an existing database; use a separate fresh development database to test initialization. Preserve existing volumes and data.
+PostgreSQL initialization runs only on an empty data volume. API startup applies versioned migrations to existing databases. Follow the [backup and upgrade procedure](docs/operations.md#migrations-and-existing-data); preserve volumes and data.
 
 Create the first administrator from a trusted local shell when testing admin-only routes. The command prompts for a password and refuses to run if an administrator already exists:
 
@@ -58,12 +58,12 @@ For the game setup, player walkthrough, endpoint coverage, and operator workflow
 
 Protected routes require `Authorization: Bearer <player-token>`. Login uses an OAuth2 form body; registration and session requests use JSON. The existing session-create request has two nested objects, `session` and `beacon_metadata`; refer to `/docs` or the example API client for exact fields.
 
-| Capability | Routes |
-| --- | --- |
-| Liveness | `GET /` |
-| Accounts | `POST /users/register`, `POST /users/login`, `GET /users/me`, `POST /users/logout`, `DELETE /users/delete_me` |
-| Administration | `POST /users/register_admin`, `GET /users/get_user`, `DELETE /users/delete` |
-| Sessions | `POST /sessions/create`, `GET /sessions/read_friend_session`, `GET /sessions/read_friend_session_data`, `GET /sessions/read_session_data`, `PUT /sessions/update`, `DELETE /sessions/delete` |
+| Capability     | Routes                                                                                                                                                                                       |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Liveness       | `GET /`                                                                                                                                                                                      |
+| Accounts       | `POST /users/register`, `POST /users/login`, `GET /users/me`, `POST /users/logout`, `DELETE /users/delete_me`                                                                                |
+| Administration | `POST /users/register_admin`, `GET /users/get_user`, `DELETE /users/delete`                                                                                                                  |
+| Sessions       | `POST /sessions/create`, `GET /sessions/read_friend_session`, `GET /sessions/read_friend_session_data`, `GET /sessions/read_session_data`, `PUT /sessions/update`, `DELETE /sessions/delete` |
 
 The `read_friend_session` names are legacy host lookup routes; actual access depends on the stored session policy. An HTTP route for creating friendships does not yet exist. Automatic FastAPI documentation routes are not gameplay endpoints.
 
@@ -72,8 +72,8 @@ The `read_friend_session` names are legacy host lookup routes; actual access dep
 Run the backend regression tests (database calls are substituted; these do not validate PostgreSQL initialization):
 
 ```sh
-python3 -m venv .venv
-.venv/bin/pip install -r src/requirements-test.txt
+python3.12 -m venv .venv
+.venv/bin/pip install --require-hashes -r src/requirements-test.txt
 .venv/bin/python -m pytest src/tests
 ```
 
@@ -85,7 +85,19 @@ npm ci
 npm test
 ```
 
-The example README also describes mock mode and the live API walkthrough. A successful mock test does not establish database integration correctness.
+Run the Python lint check:
+
+```sh
+.venv/bin/python -m ruff check src/app src/tests tests/integration
+```
+
+The example README also describes mock mode and the live API walkthrough. A successful mock test does not establish database integration correctness. CI runs the complete disposable PostgreSQL workflow, including migrations, all application routes, adversarial token checks, the privileged operator lifecycle, restart recovery, the live two-player WebSocket game, and a bounded concurrency/pool probe.
+
+## Deployment checklist
+
+Terminate browser and game traffic with TLS, set `APP_ENV=production`, and keep PostgreSQL and the FastAPI API on private networks. Configure `PUBLIC_ORIGIN` and the API's allowed origins explicitly; do not use wildcard origins with credentials. Inject `SECRET_KEY`, database credentials, and bootstrap credentials through the deployment secret store, never source control or browser configuration.
+
+Grant the application database user only the schema rights required by migrations and runtime queries. Take encrypted backups, test restores into a separate database, and preserve volumes during upgrades. Run the API readiness check from orchestration, monitor `/metrics` and structured request logs, and size game-server replicas with shared state and cleanup/lease behavior before exposing the service publicly.
 
 ## Development priorities
 

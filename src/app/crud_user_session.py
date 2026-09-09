@@ -4,7 +4,7 @@ from fastapi import HTTPException
 from sqlalchemy import text
 from sqlalchemy.exc import DBAPIError
 from models import UserSession, BeaconMetadata
-from crud_user import get_user_by_username
+from crud_user import get_user_by_username, hash_password
 from core.errors import database_error
 
 
@@ -22,6 +22,8 @@ def _session(row):
     data = dict(row._mapping)
     for key in ('beacon_metadata', 'session_whitelist', 'session_blacklist'):
         data[key] = json.loads(data[key])
+    data['beacon_metadata'] = {key: value for key, value in data['beacon_metadata'].items()
+                               if key in BeaconMetadata.model_fields}
     return UserSession(**data)
 
 
@@ -38,8 +40,14 @@ def create_session(db, session, beacon_metadata):
 
 
 def delete_session(db, session_code, host_username, session_passcode=''):
-    _execute(db, 'SELECT delete_session(:c, :h, :p)',
-             {'c': session_code, 'h': host_username, 'p': session_passcode})
+    row = _execute(db, 'SELECT host_username FROM user_sessions WHERE session_code=:c FOR UPDATE',
+                   {'c': session_code}).fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail='Session not found')
+    if row._mapping['host_username'] != host_username:
+        raise HTTPException(status_code=403, detail='Only the host can delete this session')
+    _execute(db, 'DELETE FROM user_sessions WHERE session_code=:c AND host_username=:h',
+             {'c': session_code, 'h': host_username})
     db.commit()
 
 
@@ -82,15 +90,15 @@ def update_session(db, session_update, current_username):
         raise HTTPException(status_code=404, detail='Session not found')
     if row._mapping['host_username'] != current_username:
         raise HTTPException(status_code=403, detail='Only the host can update this session')
-    if row._mapping['session_passcode'] != session_update.session_passcode:
-        raise HTTPException(status_code=403, detail='Invalid session passcode')
     settings = session_update.settings_to_update
     assignments, params = [], {'code': session_update.session_code}
     for key, value in settings.items():
+        if key == 'session_passcode' and value:
+            value = hash_password(value)
         if key == 'beacon_metadata':
             value = json.loads(value) if isinstance(value, str) else dict(value)
             value['host_username'] = row._mapping['host_username']
-            value['host_steam_id'] = row._mapping['host_steam_id']
+            value['host_steam_id'] = row._mapping['host_steam_id'] or ''
         if key in ('beacon_metadata', 'session_whitelist', 'session_blacklist'):
             value = json.dumps(value) if not isinstance(value, str) else value
         assignments.append(f'{key} = :{key}')  # Keys validated by UserSessionUpdate.

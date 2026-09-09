@@ -5,7 +5,7 @@ BEGIN
     IF _overwrite OR NOT EXISTS (SELECT 1 FROM users WHERE username = _name OR user_id = _user_id OR user_steam_id = _steam_id) THEN
         INSERT INTO users (user_id, user_steam_id, username, hashed_password, user_role) VALUES (_user_id, _steam_id, _name, _hashed_password, _role);
     ELSE
-        RAISE EXCEPTION 'Failed to create user';
+        RAISE EXCEPTION 'Failed to create user' USING ERRCODE = '23505';
     END IF;
 END;
 $$ LANGUAGE plpgsql;

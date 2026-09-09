@@ -2,7 +2,7 @@ const el = id => document.getElementById(id);
 let user = null, room = null, preview = null, mode = 'login';
 let connected = false, pending = null, cooldown = false, selected = null;
 let lastSent = 0, serial = 0;
-const ws = new WebSocket(`${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/play`);
+let ws;
 
 function friendlyError(message) {
   if (!message.startsWith('API ')) return message;
@@ -79,7 +79,7 @@ function render() {
     });
   }
   document.querySelectorAll('button').forEach(button => {
-    button.disabled = !connected || !!pending || cooldown;
+    button.disabled = (!!user && !connected) || !!pending || cooldown;
   });
   el('close-account').disabled = false;
   el('join-button').disabled ||= !preview || preview.player_count >= preview.max_player_count || ['ended', 'crashed', 'inactive'].includes(preview.session_status);
@@ -87,7 +87,33 @@ function render() {
   el('auth-submit').textContent = pending && ['login', 'register'].includes(pending.action) ? 'Signing you in…' : mode === 'login' ? 'Sign in' : 'Create account & play';
   document.querySelector('main').setAttribute('aria-busy', String(!!pending));
 }
+async function account(action, body) {
+  if (pending) return;
+  pending = { action }; feedback(); render();
+  try {
+    const response = await fetch('/auth/' + (action === 'delete_me' ? 'delete' : action), {
+      method: action === 'me' ? 'GET' : action === 'delete_me' ? 'DELETE' : 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      ...(body ? { body: JSON.stringify(body) } : {})
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      if (response.status === 401) { user = null; room = null; preview = null; ws?.close(); }
+      if (action === 'me' && response.status === 401) return;
+      throw new Error(data.error || 'Unable to sign in.');
+    }
+    user = data.user; room = null; preview = null; el('password').value = '';
+    if (user) { if (!ws || ws.readyState >= WebSocket.CLOSING) connect(); }
+    else { ws?.close(); feedback('Signed out.'); }
+  } catch (error) { feedback(error.message, true); }
+  finally { pending = null; render(); }
+}
 function act(message) {
+  if (['login', 'register', 'logout', 'delete_me'].includes(message.action)) {
+    const { action, ...body } = message;
+    return account(action, body);
+  }
   if (!connected || pending || cooldown) return;
   feedback();
   pending = { ...message, id: ++serial };
@@ -153,33 +179,38 @@ el('delete-button').onclick = () => {
   if (!confirm('Permanently delete your account and leave your room? This cannot be undone.')) return;
   el('account-dialog').close(); act({ action: 'delete_me' });
 };
-ws.onopen = () => { connected = true; el('connection').hidden = true; render(); };
-ws.onmessage = event => {
-  const data = JSON.parse(event.data);
-  if ('user' in data) { user = data.user; el('password').value = ''; if (!user) { room = null; preview = null; } }
-  if ('state' in data) {
-    if (room?.round !== data.state?.round || room?.code !== data.state?.code) selected = null;
-    room = data.state;
-    if (!room) preview = null;
-  }
-  if (data.preview) preview = data.preview;
-  if (data.error) { feedback(friendlyError(data.error), true); if (pending?.action === 'answer' && !room?.hasAnswered) selected = null; }
-  if (data.notice && !data.notice.startsWith('Connected.')) feedback(data.notice);
-  if (data.done !== undefined && data.done === pending?.id) {
-    pending = null;
-    cooldown = true;
-    setTimeout(() => { cooldown = false; render(); }, Math.max(0, 1150 - (Date.now() - lastSent)));
-  }
-  render();
-};
-ws.onclose = () => {
-  connected = false; pending = null;
-  el('account-dialog').close();
-  el('connection').hidden = false;
-  el('connection').textContent = 'Connection lost. Reload the page to sign in again.';
-  const reload = document.createElement('button'); reload.textContent = 'Reconnect'; reload.className = 'quiet';
-  reload.onclick = () => location.reload(); el('connection').append(' ', reload);
-  render(); reload.disabled = false;
-};
-ws.onerror = () => feedback('Unable to connect to the game. Check that it is running.', true);
+function connect() {
+  ws = new WebSocket(`${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/play`);
+  ws.onopen = () => { connected = true; el('connection').hidden = true; render(); };
+  ws.onmessage = event => {
+    const data = JSON.parse(event.data);
+    if ('user' in data) { user = data.user; el('password').value = ''; if (!user) { room = null; preview = null; } }
+    if ('state' in data) {
+      if (room?.round !== data.state?.round || room?.code !== data.state?.code) selected = null;
+      room = data.state;
+      if (!room) preview = null;
+    }
+    if (data.preview) preview = data.preview;
+    if (data.error) { feedback(friendlyError(data.error), true); if (pending?.action === 'answer' && !room?.hasAnswered) selected = null; }
+    if (data.notice && !data.notice.startsWith('Connected.')) feedback(data.notice);
+    if (data.done !== undefined && data.done === pending?.id) {
+      pending = null;
+      cooldown = true;
+      setTimeout(() => { cooldown = false; render(); }, Math.max(0, 1150 - (Date.now() - lastSent)));
+    }
+    render();
+  };
+  ws.onclose = event => {
+    if (event.code === 4001) { user = null; room = null; preview = null; feedback('Your session ended. Sign in again.', true); }
+    connected = false; pending = null;
+    el('account-dialog').close();
+    el('connection').hidden = !user;
+    el('connection').textContent = 'Connection lost. Reconnect to return to the lobby.';
+    const reload = document.createElement('button'); reload.textContent = 'Reconnect'; reload.className = 'quiet';
+    reload.onclick = () => location.reload(); el('connection').append(' ', reload);
+    render(); reload.disabled = false;
+  };
+  ws.onerror = () => feedback('Unable to connect to the game. Check that it is running.', true);
+}
 render();
+account('me');

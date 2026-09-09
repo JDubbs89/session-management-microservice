@@ -20,7 +20,7 @@ BEGIN
     WHERE username = _host_username LIMIT 1;
     IF NOT FOUND
     THEN
-        RAISE EXCEPTION 'Host user not found';
+        RAISE EXCEPTION 'Host user not found' USING ERRCODE = 'P0002';
     END IF;
 
     IF NOT EXISTS (SELECT 1 FROM user_sessions WHERE host_username = _host_username OR host_user_id = _host_user_id OR host_steam_id = _host_steam_id OR session_code = _session_code)
@@ -28,9 +28,9 @@ BEGIN
         INSERT INTO user_sessions
             (session_code, session_passcode, host_user_id, host_username, host_steam_id, beacon_metadata, session_status, session_whitelist, session_blacklist, allow_join)
         VALUES
-            (_session_code, _session_passcode, _host_user_id, _host_username, _host_steam_id, _beacon_metadata, _session_status, _session_whitelist, _session_blacklist, _allow_join);
+            (_session_code, CASE WHEN _session_passcode = '' THEN '' ELSE crypt(_session_passcode, gen_salt('bf', 12)) END, _host_user_id, _host_username, _host_steam_id, _beacon_metadata, _session_status, _session_whitelist, _session_blacklist, _allow_join);
     ELSE
-        RAISE EXCEPTION 'Session already exists for this host';
+        RAISE EXCEPTION 'Session already exists for this host' USING ERRCODE = '23505';
     END IF;
     SELECT * INTO _new_session
     FROM user_sessions

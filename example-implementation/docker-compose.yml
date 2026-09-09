@@ -26,6 +26,7 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg2://trivia:local-trivia-demo-password@db:5432/trivia
       SECRET_KEY: ${DEMO_SECRET_KEY:-local-trivia-demo-only-change-before-deployment}
+      RATE_LIMIT_STORAGE: postgresql
       ACCESS_TOKEN_EXPIRE_MINUTES: "60"
     depends_on:
       db:

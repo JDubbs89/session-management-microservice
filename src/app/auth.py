@@ -1,26 +1,25 @@
 import os
 from sqlalchemy.orm import Session
 from database import get_db
-from crud_user import get_user_by_username
+from crud_user import get_user_by_username, get_user_by_subject
 from datetime import datetime, timedelta, timezone
-from jose import JWTError, jwt
-from fastapi import Depends, HTTPException, status, Security
+import jwt
+from jwt import InvalidTokenError as JWTError
+from fastapi import Depends, HTTPException, status, Security, Request
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 # Secret and token settings and oauth setup
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
-SECRET_KEY = os.getenv("SECRET_KEY")
-if not SECRET_KEY:
-    raise ValueError("SECRET_KEY environment variable not set")
-
+from config import settings
+SECRET_KEY = settings.secret_key
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes
 
 
 # Creates a jwt token to send back to the client
 def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=15))
+    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
@@ -35,7 +34,7 @@ def require_role(*roles: str):
 
 
 # Decodes the submitted jwt token and tries to find and validate the user
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db), request: Request = None):
 
     # Defines an exception in the event of a failed authentication attempt
     credentials_exception = HTTPException(
@@ -57,7 +56,8 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
 
 
     # Tries to get the user from the database
-    user = get_user_by_username(db, username)
+    user = (get_user_by_subject(db, username) if payload.get("identity") == "account"
+            else get_user_by_username(db, username))
     if not user or not user["user_online"]:
         raise credentials_exception
 
@@ -66,4 +66,8 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     if user["role"] != role or payload.get("ver") != user.get("token_version", 0):
         raise credentials_exception
 
+    if request is not None:
+        request.state.rate_limit_principal = "player:" + str(user["user_id"])
+        from core.limiter import enforce_limit
+        enforce_limit(request, request.state.rate_limit_principal, scope="player")
     return user

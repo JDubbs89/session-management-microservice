@@ -7,7 +7,7 @@ BEGIN
     SELECT * INTO _result FROM users WHERE username = _username LIMIT 1;
     IF _result IS NULL
     THEN
-        RAISE EXCEPTION 'User not found';
+        RAISE EXCEPTION 'User not found' USING ERRCODE = 'P0002';
     END IF;
 
     return _result;
@@ -22,7 +22,7 @@ BEGIN
     SELECT user_id INTO _result FROM users WHERE username = _username LIMIT 1;
     IF NOT FOUND
     THEN
-        RAISE EXCEPTION 'User not found';
+        RAISE EXCEPTION 'User not found' USING ERRCODE = 'P0002';
     END IF;
     return _result;
 
@@ -38,7 +38,7 @@ BEGIN
     SELECT * INTO _result FROM users WHERE user_steam_id = _steam_id LIMIT 1;
     IF _result IS NULL
     THEN
-        RAISE EXCEPTION 'User not found';
+        RAISE EXCEPTION 'User not found' USING ERRCODE = 'P0002';
     END IF;
 
     return _result;

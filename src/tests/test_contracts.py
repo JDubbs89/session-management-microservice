@@ -9,8 +9,8 @@ import pytest
 from fastapi import HTTPException
 from pydantic import ValidationError
 
-os.environ.setdefault('DATABASE_URL', 'sqlite://')
-os.environ.setdefault('SECRET_KEY', 'test-secret-only')
+os.environ.setdefault('DATABASE_URL', 'postgresql+psycopg2://test:test@127.0.0.1/test')
+os.environ.setdefault('SECRET_KEY', 'test-secret-only-at-least-32-characters')
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'app'))
 
 from models import UserSessionCreate, UserSessionUpdate
@@ -34,7 +34,9 @@ def test_session_mapping_uses_column_names():
     result = _session(row)
     assert result.session_code == 123456
     assert result.host_user_id == 'id'
-    assert result.session_blacklist == []
+    assert 'session_blacklist' not in result.model_dump()
+    assert 'session_whitelist' not in result.model_dump()
+    assert 'session_passcode' not in result.model_dump()
 
 
 def test_admission_lists_reject_objects():
@@ -86,14 +88,14 @@ def test_delete_me_uses_authenticated_hash(monkeypatch):
 
 def test_create_rejects_impersonated_host():
     from routers.session_routes import create
-    from models import BeaconMetadata
+    from models import BeaconMetadata, SessionCreateRequest
     with pytest.raises(HTTPException) as exc:
         create.__wrapped__(request=Mock(), db=Mock(),
             current_user={'username': 'real-host', 'role': 'user'},
-            session=UserSessionCreate(session_code=123, host_username='victim'),
+            body=SessionCreateRequest(session=UserSessionCreate(session_code=123, host_username='victim'),
             beacon_metadata=BeaconMetadata(session_flavortext='Quiz', player_count=0,
                 max_player_count=4, session_start_time='2026-01-01T00:00:00Z',
-                host_username='victim'))
+                host_username='victim')))
     assert exc.value.status_code == 403
 
 

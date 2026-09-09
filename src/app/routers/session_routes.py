@@ -1,10 +1,10 @@
-from fastapi import Request, APIRouter, HTTPException, Depends
+from fastapi import Request, APIRouter, HTTPException, Depends, Header, Query
 from sqlalchemy.orm import Session
 from auth import require_role
 from crud_user import get_user_by_username
 from core.limiter import limiter
 from database import get_db
-from models import UserSession, BeaconMetadata, UserSessionUpdate, UserSessionCreate
+from models import UserSession, BeaconMetadata, UserSessionUpdate, UserSessionCreate, SessionCreateRequest
 from crud_user_session import (
     create_session,
     delete_session as crud_delete_session,
@@ -18,7 +18,7 @@ from crud_user_session import (
     )
 
 
-router = APIRouter(prefix="/sessions")
+router = APIRouter(prefix="/sessions", tags=["legacy sessions"], deprecated=True)
 
 # Constants are unused for now, they won't work for some reason
 ROLE_STANDARD = "user", "admin"
@@ -26,20 +26,22 @@ ROLE_ADMIN = "admin"
 ROLE_USER = "user"
 
 # CREATE SESSION ENDPOINT
-@router.post("/create", response_model=UserSession)
+@router.post("/create", response_model=UserSession, status_code=201)
 @limiter.limit("1/second")
 def create(
     request: Request,
-    session: UserSessionCreate,
-    beacon_metadata: BeaconMetadata,
+    body: SessionCreateRequest,
     db: Session = Depends(get_db),
     current_user = Depends(require_role("user", "admin"))
     ):
+    session, beacon_metadata = body.session, body.beacon_metadata
     # Does not need user steam id or user id, as they are in the db already and will be fetched
     if session.host_username != current_user["username"]:
         raise HTTPException(status_code=403, detail="Only the authenticated host can create a session")
+    session.host_user_id = current_user["user_id"]
+    session.host_steam_id = current_user["user_steam_id"] or ""
     beacon_metadata.host_username = current_user["username"]
-    beacon_metadata.host_steam_id = current_user["user_steam_id"]
+    beacon_metadata.host_steam_id = current_user["user_steam_id"] or ""
     return create_session(db, session, beacon_metadata)
 
 
@@ -50,7 +52,7 @@ def create(
 def read_friend_session(
     request: Request, db: Session = Depends(get_db),
     current_user = Depends(require_role("user", "admin")),
-    friend_name: str = '', session_passcode: str = ''
+    friend_name: str = Query(min_length=1, max_length=64), session_passcode: str = Header(default='', alias='X-Session-Passcode', max_length=72)
     ):
 
     if not is_friend_hosting_session(db, friend_name):
@@ -66,7 +68,7 @@ def read_friend_session_data(
     request: Request,
     db: Session = Depends(get_db),
     current_user = Depends(require_role("user", "admin")),
-    friend_name: str = '',
+    friend_name: str = Query(min_length=1, max_length=64),
     ):
 
     if not is_friend_hosting_session(db, friend_name):
@@ -82,7 +84,7 @@ def read_session_data(
     request: Request,
     db: Session = Depends(get_db),
     current_user = Depends(require_role("user", "admin")),
-    session_code: int = 0
+    session_code: int = Query(ge=1, le=2147483647)
     ):
 
     if not check_session_exists(db, session_code):
@@ -92,7 +94,7 @@ def read_session_data(
 
 
 # UPDATE SESSION ENDPOINT
-@router.put("/update")
+@router.put("/update", status_code=204)
 @limiter.limit("1/second")
 def update_session(
     request: Request,
@@ -108,13 +110,12 @@ def update_session(
 
 
 # DELETE SESSION ENDPOINT
-@router.delete("/delete")
+@router.delete("/delete", status_code=204)
 @limiter.limit("1/second")
 def delete_session(
     request: Request,
-    session_code: int,
-    host_username: str,
-    session_passcode: str = '',
+    session_code: int = Query(ge=1, le=2147483647),
+    host_username: str = Query(min_length=1, max_length=64),
     db: Session = Depends(get_db),
     current_user = Depends(require_role("user", "admin"))
     ):
@@ -122,7 +123,7 @@ def delete_session(
     if not check_session_exists(db, session_code):
         raise HTTPException(status_code=404, detail="Session does not exist")
 
-    if host_username != current_user["username"] and current_user["role"] != "admin":
+    if host_username != current_user["username"]:
         raise HTTPException(status_code=403, detail="Insufficient permissions")
 
-    crud_delete_session(db, session_code, host_username, session_passcode)
+    crud_delete_session(db, session_code, current_user["username"])

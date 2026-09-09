@@ -63,6 +63,8 @@ test('HTTP cookie auth restores identity across reconnects and logout revokes so
     await rejectedSocket(app, cookie);
     const login = await app.request('login', {method:'POST',body:{username:'alice',password:'correct-password'}});
     assert.ok(login.ok);
+    assert.equal((await app.request('me', {cookie})).status, 401);
+    await rejectedSocket(app, cookie);
   } finally { await app.close(); }
 });
 
@@ -116,4 +118,43 @@ test('HTTPS public origins issue Secure cookies', async () => {
   const app = await fixture({origin:'https://trivia.example'});
   try { const {response}=await register(app); assert.match(response.headers.get('set-cookie'), /; Secure/i); }
   finally { await app.close(); }
+});
+
+test('expired and duplicate cookies are rejected and expired sockets close', async () => {
+  const app = await fixture();
+  try {
+    const { cookie } = await register(app);
+    const token = decodeURIComponent(cookie.split('=')[1]);
+    assert.equal((await app.request('me', {cookie: cookie + '; ' + cookie})).status, 401);
+    app.api.tokens.get(token).exp = Date.now() - 1;
+    assert.equal((await app.request('me', {cookie})).status, 401);
+    await rejectedSocket(app, cookie);
+
+    const originalLogin = app.api.login.bind(app.api);
+    app.api.login = async (...args) => {
+      const result = await originalLogin(...args);
+      const parts = result.access_token.split('.');
+      parts[1] = Buffer.from(JSON.stringify({exp: (Date.now() + 200) / 1000})).toString('base64url');
+      const shortToken = parts.join('.');
+      app.api.tokens.set(shortToken, app.api.tokens.get(result.access_token));
+      return {access_token: shortToken};
+    };
+    const response = await app.request('login', {method: 'POST', body: {username: 'alice', password: 'correct-password'}});
+    const ws = app.socket(response.headers.get('set-cookie').split(';')[0]);
+    await once(ws, 'open');
+    const [code] = await once(ws, 'close');
+    assert.equal(code, 4001);
+  } finally { await app.close(); }
+});
+
+test('upstream outages do not clear valid cookies or expose upstream errors', async () => {
+  const app = await fixture();
+  try {
+    const { cookie } = await register(app);
+    app.api.me = async () => { throw new Error('secret upstream detail'); };
+    const response = await app.request('me', {cookie});
+    assert.equal(response.status, 502);
+    assert.equal(response.headers.get('set-cookie'), null);
+    assert.doesNotMatch(await response.text(), /secret upstream detail/);
+  } finally { await app.close(); }
 });

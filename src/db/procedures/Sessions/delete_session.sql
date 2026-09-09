@@ -5,18 +5,18 @@ BEGIN
 
     IF NOT EXISTS (SELECT 1 FROM users WHERE username = _host_username)
     THEN
-        RAISE EXCEPTION 'Authorization failed';
+        RAISE EXCEPTION 'Authorization failed' USING ERRCODE = '42501';
     END IF;
 
-    IF NOT EXISTS (SELECT 1 FROM user_sessions WHERE session_code = _session_code AND host_username = _host_username AND session_passcode = _session_passcode)
+    IF NOT EXISTS (SELECT 1 FROM user_sessions WHERE session_code = _session_code AND host_username = _host_username AND (session_passcode = '' OR crypt(_session_passcode, session_passcode) = session_passcode))
     THEN
-        RAISE EXCEPTION 'Session not found';
+        RAISE EXCEPTION 'Session not found' USING ERRCODE = 'P0002';
     END IF;
 
     DELETE FROM user_sessions
     WHERE session_code = _session_code
     AND host_username = _host_username
-    AND session_passcode = _session_passcode;
+    AND (session_passcode = '' OR crypt(_session_passcode, session_passcode) = session_passcode);
 
 END;
 $$ LANGUAGE plpgsql;

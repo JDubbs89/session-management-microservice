@@ -1,4 +1,5 @@
 \set ON_ERROR_STOP on
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 -- Import Tables
 \i /docker-entrypoint-initdb.d/tables/users.sql
 \i /docker-entrypoint-initdb.d/tables/user_friendships.sql

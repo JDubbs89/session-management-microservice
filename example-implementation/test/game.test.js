@@ -24,3 +24,15 @@ test('client covers all 15 routes and encodes auth, forms, queries, nested bodie
 });
 test('API errors propagate without silently switching to mock',async()=>{const api=new SessionApi('http://api.test',async()=>new Response('{"detail":"bad"}',{status:403}));await assert.rejects(api.me('t'),/403/);});
 test('mock account and room lifecycle',async()=>{const api=new MockApi();await api.register({username:'a',password:'secret',user_id:'1'});const t=(await api.login('a','secret')).access_token;await api.create(t,{session_code:1,host_username:'a'},{player_count:1});assert.equal((await api.byHost(t,'a')).session_code,1);await api.update(t,1,{allow_join:'private'});assert.equal((await api.previewCode(t,1)).player_count,1);await api.deleteSession(t,1,'a');await assert.rejects(api.previewCode(t,1));await api.deleteMe(t);await assert.rejects(api.me(t));});
+
+test('session passcodes use a header and never appear in URLs', async () => {
+ const calls=[];
+ const api=new SessionApi('http://api.test',async(url,options)=>{calls.push({url,options});return new Response('{}');});
+ await api.byHost('token','host','room-secret');
+ await api.deleteSession('token',123,'host');
+ assert.equal(calls[0].options.headers['X-Session-Passcode'],'room-secret');
+ for(const {url} of calls) {
+  assert.equal(url.searchParams.has('session_passcode'),false);
+  assert.equal(url.href.includes('room-secret'),false);
+ }
+});

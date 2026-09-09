@@ -8,7 +8,7 @@ BEGIN
     SELECT * INTO _user FROM users WHERE user_id = _user_id AND hashed_password = _hashed_password LIMIT 1;
     IF _user IS NULL
     THEN
-        RAISE EXCEPTION 'User not found or insufficient credentials';
+        RAISE EXCEPTION 'User not found or insufficient credentials' USING ERRCODE = 'P0002';
     END IF;
 
 

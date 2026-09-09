@@ -2,20 +2,26 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from sqlalchemy.exc import DBAPIError
 import bcrypt
+from uuid import uuid4
 from fastapi import HTTPException
 from core.errors import database_error
 
 # Initialize the password context with a hashing algorithm
 def hash_password(password: str):
-    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt(prefix=b'2a')).decode()
 
 
 # Takes in username, password, and role to create a new user with said parameters
 def create_user(db: Session, user_id: str, steam_id: str, username: str, password: str, role: str = "user"):
     hashed = hash_password(password)
+    user_id = str(uuid4())
     try:
         db.execute(text("SELECT create_new_user(:i, :s, :u, :p, :r)"),
-                   {"i": user_id, "s": steam_id,"u": username, "p": hashed, "r": role})
+                   {"i": user_id, "s": steam_id or None,"u": username, "p": hashed, "r": role})
+        if steam_id:
+            db.execute(text("INSERT INTO account_external_identities(user_id, provider, external_subject) "
+                            "VALUES (:user_id, 'steam', :steam_id)"),
+                       {"user_id": user_id, "steam_id": steam_id})
         db.commit()
     except DBAPIError as e:
         db.rollback()
@@ -90,8 +96,10 @@ def get_user_by_username(db: Session, username: str):
                             {"u": username})
         row = result.fetchone()
         if row:
-            return {"user_id": row[1], "user_steam_id": row[2], "username": row[3], "hashed_password": row[4]
-                    , "user_online": row[5], "last_activity": row[6], "role": row[7], "token_version": row[8] if len(row) > 8 else 0}
+            data = dict(row._mapping)
+            data["role"] = data.pop("user_role")
+            data["subject"] = str(data.get("subject", data["user_id"]))
+            return data
         return None
     except DBAPIError as e:
         db.rollback()
@@ -105,8 +113,10 @@ def get_user_by_steam_id(db: Session, steam_id: str):
                             {"s": steam_id})
         row = result.fetchone()
         if row:
-            return {"user_id": row[1], "user_steam_id": row[2], "username": row[3], "hashed_password": row[4]
-                    , "user_online": row[5], "last_activity": row[6], "role": row[7], "token_version": row[8] if len(row) > 8 else 0}
+            data = dict(row._mapping)
+            data["role"] = data.pop("user_role")
+            data["subject"] = str(data.get("subject", data["user_id"]))
+            return data
         return None
     except DBAPIError as e:
         db.rollback()
@@ -119,3 +129,13 @@ def verify_password(plain_password: str, hashed_password: str):
         return bcrypt.checkpw(plain_password.encode(), hashed_password.encode())
     except ValueError:
         return False
+
+
+def get_user_by_subject(db: Session, subject: str):
+    try:
+        row = db.execute(text("SELECT username FROM users WHERE subject::text = :subject"),
+                         {"subject": subject}).fetchone()
+        return get_user_by_username(db, row[0]) if row else None
+    except DBAPIError as exc:
+        db.rollback()
+        raise database_error(db, exc) from exc
