@@ -1,25 +1,25 @@
 # Node.js WebSocket trivia example
 
-This folder contains two runnable examples. Trivia is the default; the service-directory console is selected explicitly with `EXAMPLE=directory`.
+This folder contains two runnable examples. Trivia is the default; the service-directory console is selected with `./run-demo.sh --directory-example`.
 
 The browser connects only to the Node game server. Node reads API bearer tokens from an HttpOnly cookie, calls the Python API for accounts and session discovery, and owns room membership, questions and scoring. Correct answers never travel to the browser. This is a local teaching example, with four players and three questions per room.
 
 ## Choose a demo
 
-| Demo                    | Local command                                     | Purpose                                                              |
-| ----------------------- | ------------------------------------------------- | -------------------------------------------------------------------- |
-| Trivia game             | `npm run demo`                                    | Four-player WebSocket game using the in-memory mock API              |
-| Trivia game against API | `SESSION_API_URL=http://127.0.0.1:8000 npm start` | Legacy player and session integration                                |
-| Service directory       | `SERVICE_CREDENTIAL=... npm run directory`        | `/v1` service, player, room, membership, lease, and close operations |
+| Demo                    | Local command                                     | Purpose                                                                               |
+| ----------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Trivia game             | `./run-demo.sh`                                   | Four-player WebSocket game using the in-memory mock API                               |
+| Trivia game against API | `SESSION_API_URL=http://127.0.0.1:8000 npm start` | Legacy player and session integration                                                 |
+| Service directory       | `./run-demo.sh --directory-example`               | `/v1` service, player, room, membership, player deletion, lease, and close operations |
 
-`npm start` also defaults to trivia when `EXAMPLE` is unset. The directory demo requires a service credential because `/v1` endpoints use service authentication, not player JWTs. Provision one with `npm run directory-operator` as described below, then export the credential in the same shell before starting the directory server.
+`npm start` also defaults to trivia when `EXAMPLE` is unset. The Compose directory demo automatically provisions a disposable service credential for its local API. For a separately running API, set `DIRECTORY_AUTO_PROVISION=1`, `DIRECTORY_ADMIN_USERNAME`, and `DIRECTORY_ADMIN_PASSWORD`, or provide an explicit `SERVICE_CREDENTIAL`.
 
 ## Run the complete demo with Docker
 
 Requires a running Docker Engine accessible to your account and Docker Compose (`docker-compose`). Verify with `docker info`; for a missing socket on systemd Linux, run `sudo systemctl start docker`. See [daemon troubleshooting](../docs/operations.md#docker-prerequisite) for socket permission errors. From the repository root:
 
 ```sh
-docker-compose -f example-implementation/docker-compose.yml up --build -d --wait
+./example-implementation/run-demo.sh
 ```
 
 Open **http://127.0.0.1:3000** in two separate browser profiles and follow the player walkthrough below. The equivalent `localhost` address also works; WebSocket Origin validation accepts loopback aliases on the configured port. No local Python, Node, or environment file is needed for this Docker demo.
@@ -29,13 +29,13 @@ The stack runs three containers: PostgreSQL initializes the schema and stored fu
 The trivia example is selected by default. To run the service-directory example instead, first provision a service credential as described below, then start Compose with:
 
 ```sh
-EXAMPLE=directory SERVICE_CREDENTIAL='credential-printed-by-directory-operator' docker-compose -f example-implementation/docker-compose.yml up --build -d --wait
+./example-implementation/run-demo.sh --directory-example
 ```
 
 This stack uses fixed local demo database credentials and a demo signing secret. `DEMO_SECRET_KEY` overrides the signing secret. `DEMO_PUBLIC_ORIGIN` sets an explicit browser origin when using a local reverse proxy (which must forward WebSocket upgrades). Other origins remain rejected. `DEMO_PORT` changes the browser port and allowed origin together, for example:
 
 ```sh
-DEMO_PORT=3001 docker-compose -f example-implementation/docker-compose.yml up --build -d --wait
+DEMO_PORT=3001 ./example-implementation/run-demo.sh
 ```
 
 Open `http://127.0.0.1:3001` for that configuration. Use the same environment overrides for subsequent Compose commands.
@@ -53,7 +53,7 @@ The volume is separate from the original `src/docker-compose.yml` stack. Restart
 The database image bundles the SQL initialization files with container-readable permissions. It does not bind-mount the host SQL directory. After pulling changes to those files, rebuild with the startup command above. If an older stack reports `ls: cannot open directory '/docker-entrypoint-initdb.d/': Permission denied`, rebuilding and recreating the database container removes that mount while preserving the data volume:
 
 ```sh
-docker-compose -f example-implementation/docker-compose.yml up --build -d --wait
+./example-implementation/run-demo.sh
 ```
 
 If startup still fails, inspect `docker-compose -f example-implementation/docker-compose.yml logs --tail=100 db api`. Do not rerun `init.sql` manually over an existing database; use versioned migrations.
@@ -71,21 +71,13 @@ unset ADMIN_USERNAME ADMIN_PASSWORD
 
 Bootstrap only once. The operator uses the game's internal API URL and removes its temporary administrator when finished.
 
-To switch the Docker stack to the directory console, create a service credential against the running Compose API, then recreate only the game container with that credential:
+To switch the Docker stack to the directory console, recreate only the game container. Compose automatically creates a disposable admin and service credential for this local stack:
 
 ```sh
-read -r -p 'Admin username: ' ADMIN_USERNAME
-read -r -s -p 'Admin password: ' ADMIN_PASSWORD
-export ADMIN_USERNAME ADMIN_PASSWORD
-docker-compose -f example-implementation/docker-compose.yml exec -e ADMIN_USERNAME -e ADMIN_PASSWORD game npm run directory-operator
-unset ADMIN_USERNAME ADMIN_PASSWORD
-read -r -s -p 'Service credential: ' SERVICE_CREDENTIAL
-export SERVICE_CREDENTIAL
-EXAMPLE=directory docker-compose -f example-implementation/docker-compose.yml up --build -d --wait game
-unset SERVICE_CREDENTIAL
+./run-demo.sh --directory-example
 ```
 
-The directory operator prints a service credential once. Keep it available for the `up` command; it is not recoverable from the API after creation. Return to trivia with `EXAMPLE=trivia docker-compose -f example-implementation/docker-compose.yml up --build -d --wait game`, or omit `EXAMPLE` because trivia is the default. Run `docker-compose ... down` when changing modes if you also want to stop the other containers.
+Return to trivia with `./run-demo.sh`, because trivia is the default. Run `docker-compose ... down` when changing modes if you also want to stop the other containers. To use a manually provisioned credential instead, set `SERVICE_CREDENTIAL`; it overrides automatic provisioning.
 
 ## Run without Docker
 
@@ -147,19 +139,37 @@ The existing friend-named routes also discover public rooms; this example does n
 
 ## Service directory example
 
-This is a second runnable implementation for the `/v1` service API. It keeps the service credential on the Node server and provides a guided room operations console at the same port. Provision a player first, then create or select a room. From the selected room, inspect membership, admit/remove/ban the selected player, renew the lease, or close the room. The server also exposes the join, leave, and ban calls at `/api/rooms/:room_id/{join,leave,ban}` for a game integration to use with a provisioned `player_id`.
+This second demo provides **Users** and **Groups** views for the `/v1` service API. The service credential stays on the Node server.
 
-Against a running API, provision a disposable service and player with an existing administrator:
+- **Users:** search by name, add or rename a user, view their groups, add/remove membership, and confirm deletion. Optional external identities are tucked into the add-user form. Shared users are marked and cannot be renamed or deleted until an operator unshares them.
+- **Groups:** browse both public and private groups owned by this service, create or edit their name, activity, capacity, visibility, and connection settings. Select members by name, create a new user directly inside a group, remove or ban members, and confirm closing a group.
+- Forms retain values on errors, prevent duplicate submissions, and check stale edits. Lists load 100 records at a time with server-side search and **Load more**. Membership pickers use the currently loaded users/groups; browse or search the corresponding view to find more.
+
+Groups represent the API's **live rooms**, not permanent social groups. A group expires after 90 seconds without renewal. **Renew now** extends its lease, or enable **Keep this selected group active** for renewal every 30 seconds while that group is selected. Switching to Users, editing a form, or closing the page pauses automatic renewal. Connection origins still require operator approval; leave the public address blank for the automatically provisioned demo.
+
+Run it with `./example-implementation/run-demo.sh --directory-example` from the repository root. Changes to the server API require rebuilding the API container as well as the directory demo; no new database migration is needed for these management views.
+
+Start the API first, using the repository development setup or an existing API. For the local development server:
+
+```sh
+cd ..
+python -m uvicorn main:app --app-dir src/app --host 127.0.0.1 --port 8000 --no-proxy-headers
+```
+
+In a second terminal, provision a disposable service and player with an existing administrator:
 
 ```sh
 cd example-implementation
 export SESSION_API_URL=http://127.0.0.1:8000
-ADMIN_USERNAME=admin ADMIN_PASSWORD='your-password' npm run directory-operator
-export SERVICE_CREDENTIAL='credential-printed-by-the-command'
+export DIRECTORY_AUTO_PROVISION=1
+export DIRECTORY_ADMIN_USERNAME=directory-demo-admin
+export DIRECTORY_ADMIN_PASSWORD=directory-demo-password-123
 npm run directory
 ```
 
-The operator calls service creation, credential rotation, player creation, and the administrator grant endpoint. It prints the credential once; keep it in a secret store or environment variable. The console calls every service room and player endpoint through the server-side `SessionApi`, including idempotent membership and ban operations. The credential is never sent to browser JavaScript.
+The Compose stack automatically provisions the demo administrator and service credential. For a separately running API, create the administrator with the repository bootstrap command using the same username and password above, or use `npm run directory-operator` to create a service manually and export its printed credential as `SERVICE_CREDENTIAL`. The console calls every service room and player endpoint through the server-side `SessionApi`, including idempotent membership and ban operations. The credential is never sent to browser JavaScript.
+
+If a separately running directory app reports that the service credential was rejected, rerun `directory-operator` against the same API URL and database used by the directory app. Copy only the `credential` value from its JSON output, not the `service_id` or `player_id`, and export it as `SERVICE_CREDENTIAL` before starting the app.
 
 ## Validation and limits
 
@@ -172,3 +182,9 @@ Tests cover cookie restoration, logout/deletion, missing/tampered/expired creden
 Only the local host can advance questions; membership and answers are checked on the server. Rooms lock when play starts. The host controls question timing, and scores update immediately. Each account gets one active connection. Login and registration use same-origin HTTP routes. Tokens are stored in a host-only, HttpOnly, SameSite=Strict cookie with a lifetime bounded by JWT expiry; HTTPS public origins add Secure. Browser JavaScript never receives the token. Page load restores identity through GET /auth/me, and WebSocket upgrades verify the cookie through the API before accepting gameplay. Auth mutations require a trusted Origin. Refresh and reconnect preserve sign-in and return to the lobby. Disconnect removes local membership; a host disconnect attempts API session deletion and closes the room. Failed remote cleanup is logged and requires operator attention. Token expiry closes the connection and requires sign-in again. Sign-out and deletion clean up active rooms, call the API, clear the cookie, and close account connections. Locally revoked tokens are rejected until expiry. The API also implements persistent account token-version revocation on logout; the live CI suite verifies revocation after a new login, API/database restart, and subsequent API access.
 
 Outside Docker, trivia defaults to loopback and validates WebSocket Origin (default `http://127.0.0.1:3000`). `HOST`, `PORT`, and `PUBLIC_ORIGIN` customize serving; Compose sets these for container networking. For deployment, put the game and API behind TLS, keep PostgreSQL private, configure explicit trusted origins, inject secrets from a secret manager, and use durable/shared game state with reliable session lease and cleanup handling. The directory example uses a server-side service credential and is intended for local integration testing, not direct internet exposure.
+
+### Directory validation
+
+`npm test` includes the directory proxy and API-client regression checks. Backend listing/editing authorization, stale-write, and capacity checks are in `src/tests/test_services.py`. Against a disposable migrated PostgreSQL database, run `INTEGRATION_TEST_DATABASE=1 python tests/integration/directory.py` with the normal API environment.
+
+A separate browser smoke test exercises user/group creation and editing, membership, confirmations, retained forms, search, escaping, and mobile layout with a deterministic API fixture. With Playwright installed, run `node tests/integration/directory-browser.mjs`; set `PLAYWRIGHT_MODULE` to its module path if installed outside this repository. Screenshots are written to `/tmp/directory-desktop.png` and `/tmp/directory-mobile.png`. This browser fixture is separate from the PostgreSQL test.

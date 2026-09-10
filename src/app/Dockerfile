@@ -12,4 +12,4 @@ RUN pip install --no-cache-dir --require-hashes -r requirements.txt
 COPY . .
 
 # Run FastAPI server
-CMD ["sh", "-c", "python migrate.py && exec uvicorn main:app --host 0.0.0.0 --port 8000 --no-proxy-headers --no-access-log --timeout-graceful-shutdown 30"]
+CMD ["sh", "-c", "python migrate.py && python bootstrap_demo.py && exec uvicorn main:app --host 0.0.0.0 --port 8000 --no-proxy-headers --no-access-log --timeout-graceful-shutdown 30"]

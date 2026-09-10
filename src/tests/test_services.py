@@ -72,3 +72,51 @@ def test_heartbeat_rejects_stale_version_without_writing():
     assert exc.value.status_code == 409
     assert db.execute.call_count == 1
     db.commit.assert_not_called()
+
+
+def test_edit_group_requires_current_version_before_writes():
+    from routers.service_routes import edit_room, RoomEdit
+    db=Mock()
+    db.execute.return_value.mappings.return_value.first.return_value={
+        'service_id':'s','closed':False,'lease_until':datetime.now(timezone.utc)+timedelta(seconds=60),'version':3}
+    with pytest.raises(HTTPException) as exc:
+        edit_room('room', RoomEdit(code='group',game='trivia',protocol='v1',capacity=2,version=2),
+                  {'scopes':['rooms:write'],'service_id':'s','tenant_id':'tenant'},db)
+    assert exc.value.status_code==409
+    assert db.execute.call_count==1
+    db.commit.assert_not_called()
+
+
+def test_group_cannot_shrink_below_current_membership():
+    from routers.service_routes import edit_room, RoomEdit
+    db=Mock()
+    db.execute.return_value.mappings.return_value.first.return_value={
+        'service_id':'s','closed':False,'lease_until':datetime.now(timezone.utc)+timedelta(seconds=60),'version':3}
+    db.execute.return_value.scalar.return_value=4
+    with pytest.raises(HTTPException) as exc:
+        edit_room('room',RoomEdit(code='group',game='trivia',protocol='v1',capacity=2,version=3),
+                  {'scopes':['rooms:write'],'service_id':'s','tenant_id':'tenant'},db)
+    assert exc.value.status_code==409
+    db.commit.assert_not_called()
+    assert db.execute.call_count==2
+
+
+def test_shared_user_cannot_be_renamed():
+    from routers.service_routes import edit_player, PlayerEdit
+    db=Mock()
+    db.execute.return_value.first.return_value=('Alex',)
+    db.execute.return_value.scalar.side_effect=[True,2]
+    with pytest.raises(HTTPException) as exc:
+        edit_player('player',PlayerEdit(subject='New',previous_subject='Alex'),
+                    {'scopes':['players:write'],'service_id':'s','tenant_id':'tenant'},db)
+    assert exc.value.status_code==409
+    db.commit.assert_not_called()
+
+
+def test_player_listing_is_grant_and_tenant_scoped():
+    from routers.service_routes import list_players
+    db=Mock();db.execute.return_value.mappings.return_value=[]
+    assert list_players(100,0,'Alex',{'scopes':['players:write'],'service_id':'s','tenant_id':'tenant'},db)==[]
+    sql,params=db.execute.call_args.args
+    assert 'g.service_id=:s' in str(sql) and 'p.tenant_id=:t' in str(sql)
+    assert params['s']=='s' and params['t']=='tenant'

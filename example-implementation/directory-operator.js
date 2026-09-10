@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { SessionApi } from './api.js';
 
-const { ADMIN_USERNAME, ADMIN_PASSWORD, SESSION_API_URL } = process.env;
+const { ADMIN_USERNAME, ADMIN_PASSWORD, SESSION_API_URL = 'http://127.0.0.1:8000' } = process.env;
 if (!ADMIN_USERNAME || !ADMIN_PASSWORD) throw new Error('Set ADMIN_USERNAME and ADMIN_PASSWORD for an existing bootstrap admin');
 const api = new SessionApi(SESSION_API_URL);
 await api.health();

@@ -34,3 +34,11 @@ SELECT cleanup_expired_rooms();
 ```
 
 Cleanup and request actions use separate committed transactions, releasing cleanup locks before room operations. There is no durable room history after cleanup. Keep game history elsewhere if needed. Scope/origin changes and grant revocation endpoints are not provided in this initial contract; administrative database changes require normal controlled operations. Legacy player routes remain a compatibility surface and do not expose `/v1` directory rooms.
+
+## Directory management views
+
+`GET /v1/players?limit=100&offset=0&q=alex` lists only players granted to the authenticated service (requires `players:write`). Each row includes its name (`subject`), shared status, and live group memberships owned by that service. Search is a case-insensitive literal substring. `PATCH /v1/players/{id}` takes `subject` and `previous_subject`; a stale name or shared identity returns 409. The stable player ID and external identities remain unchanged.
+
+`GET /v1/rooms?owned=true` lists the service's own live rooms, including private rooms; the default directory still lists only tenant-visible public rooms. It supports bounded `q`, `limit`, and `offset`, and returns policy, lease, and member counts. Room detail includes `member_details` with member IDs and subjects for display.
+
+`PATCH /v1/rooms/{id}` takes the room-create fields plus the last read `version`. Only the owning service may edit. It checks the approved connection origin, current version, and capacity against existing membership while holding the room lock, then increments the version. Editing does not renew the lease. Existing grants, scopes, and tenant isolation apply to all management operations.

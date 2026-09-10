@@ -28,6 +28,8 @@ services:
       SECRET_KEY: ${DEMO_SECRET_KEY:-local-trivia-demo-only-change-before-deployment}
       RATE_LIMIT_STORAGE: postgresql
       ACCESS_TOKEN_EXPIRE_MINUTES: "60"
+      DEMO_ADMIN_USERNAME: ${DEMO_ADMIN_USERNAME:-directory-demo-admin}
+      DEMO_ADMIN_PASSWORD: ${DEMO_ADMIN_PASSWORD:-directory-demo-password-123}
     depends_on:
       db:
         condition: service_healthy
@@ -51,6 +53,9 @@ services:
       TRIVIA_MOCK: "0"
       EXAMPLE: ${EXAMPLE:-trivia}
       SERVICE_CREDENTIAL: ${SERVICE_CREDENTIAL:-}
+      DIRECTORY_AUTO_PROVISION: "1"
+      DIRECTORY_ADMIN_USERNAME: ${DEMO_ADMIN_USERNAME:-directory-demo-admin}
+      DIRECTORY_ADMIN_PASSWORD: ${DEMO_ADMIN_PASSWORD:-directory-demo-password-123}
     ports:
       - "127.0.0.1:${DEMO_PORT:-3000}:3000"
     depends_on:

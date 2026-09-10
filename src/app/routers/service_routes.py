@@ -159,6 +159,59 @@ def create_player(body: PlayerCreate, service=Depends(service_auth), db=Depends(
     db.commit()
     return dict(row)
 
+class PlayerEdit(Strict):
+    subject: str = Field(min_length=1, max_length=128)
+    previous_subject: str = Field(min_length=1, max_length=128)
+
+@router.get('/players')
+def list_players(limit: int=Query(100,ge=1,le=100), offset: int=Query(0,ge=0,le=100000),
+                 q: str=Query('',max_length=128), service=Depends(service_auth), db=Depends(get_db)):
+    scope(service, 'players:write')
+    return [dict(row) for row in db.execute(text("""
+        SELECT p.player_id,p.subject,
+          (SELECT count(*) FROM service_player_grants g2 WHERE g2.player_id=p.player_id)>1 AS shared,
+          COALESCE((SELECT json_agg(json_build_object('room_id',r.room_id,'code',r.code) ORDER BY r.code)
+            FROM room_members m JOIN rooms r ON r.room_id=m.room_id
+            WHERE m.player_id=p.player_id AND r.service_id=:s AND r.tenant_id=:t
+            AND NOT r.closed AND r.lease_until>CURRENT_TIMESTAMP),'[]'::json) AS groups
+        FROM service_players p JOIN service_player_grants g ON g.player_id=p.player_id AND g.tenant_id=p.tenant_id
+        WHERE g.service_id=:s AND p.tenant_id=:t AND strpos(lower(p.subject),lower(:q))>0
+        ORDER BY p.subject,p.player_id LIMIT :limit OFFSET :offset
+    """), {'s':service['service_id'],'t':service['tenant_id'],'q':q,'limit':limit,'offset':offset}).mappings()]
+
+@router.patch('/players/{player_id}')
+def edit_player(player_id: str, body: PlayerEdit, service=Depends(service_auth), db=Depends(get_db)):
+    scope(service, 'players:write')
+    row=db.execute(text('SELECT subject FROM service_players WHERE tenant_id=:t AND player_id=:p FOR UPDATE'),
+                   {'t':service['tenant_id'],'p':player_id}).first()
+    granted=db.execute(text('SELECT 1 FROM service_player_grants WHERE service_id=:s AND player_id=:p AND tenant_id=:t'),
+                       {'s':service['service_id'],'p':player_id,'t':service['tenant_id']}).scalar()
+    if not row or not granted:
+        raise HTTPException(404, 'Player not found')
+    if row[0] != body.previous_subject:
+        raise HTTPException(409, 'Player changed; refresh before editing')
+    if db.execute(text('SELECT count(*) FROM service_player_grants WHERE player_id=:p'), {'p':player_id}).scalar() > 1:
+        raise HTTPException(409, 'Shared players cannot be renamed')
+    db.execute(text('UPDATE service_players SET subject=:subject WHERE player_id=:p AND tenant_id=:t'),
+               {'subject':body.subject,'p':player_id,'t':service['tenant_id']})
+    db.commit()
+    return {'player_id':player_id,'subject':body.subject,'shared':False}
+
+@router.delete('/players/{player_id}')
+def delete_player(player_id: str, service=Depends(service_auth), db=Depends(get_db)):
+    scope(service, 'players:write')
+    grants = db.execute(text('SELECT COUNT(*) FROM service_player_grants WHERE tenant_id=:t AND player_id=:p'), {'t':service['tenant_id'],'p':player_id}).scalar()
+    owned = db.execute(text('SELECT 1 FROM service_player_grants WHERE tenant_id=:t AND service_id=:s AND player_id=:p'), {'t':service['tenant_id'],'s':service['service_id'],'p':player_id}).scalar()
+    if not owned:
+        raise HTTPException(404, 'Player not found')
+    if grants > 1:
+        raise HTTPException(409, 'Player is shared with another service')
+    result = db.execute(text('DELETE FROM service_players WHERE tenant_id=:t AND player_id=:p'), {'t':service['tenant_id'],'p':player_id})
+    if not result.rowcount:
+        raise HTTPException(404, 'Player not found')
+    db.commit()
+    return {'deleted':True,'player_id':player_id}
+
 @router.post('/rooms', status_code=201)
 def create_room(body: RoomCreate, service=Depends(service_auth), db=Depends(get_db)):
     scope(service,'rooms:write')
@@ -170,9 +223,37 @@ def create_room(body: RoomCreate, service=Depends(service_auth), db=Depends(get_
     return dict(row)
 
 @router.get('/rooms')
-def discover(limit: int=Query(50,ge=1,le=100), offset: int=Query(0,ge=0,le=100000), service=Depends(service_auth), db=Depends(get_db)):
+def discover(limit: int=Query(50,ge=1,le=100), offset: int=Query(0,ge=0,le=100000),
+             owned: bool=False, q: str=Query('',max_length=128), service=Depends(service_auth), db=Depends(get_db)):
     scope(service,'rooms:read')
-    return [dict(row) for row in db.execute(text("SELECT room_id,code,game,protocol,capacity,public_address,version,lease_until FROM rooms WHERE tenant_id=:t AND NOT closed AND policy='public' AND lease_until>CURRENT_TIMESTAMP ORDER BY room_id LIMIT :l OFFSET :o"), {'t':service['tenant_id'],'l':limit,'o':offset}).mappings()]
+    return [dict(row) for row in db.execute(text("""
+        SELECT room_id,code,game,protocol,capacity,public_address,policy,version,lease_until,
+          (SELECT count(*) FROM room_members m WHERE m.room_id=rooms.room_id) AS member_count
+        FROM rooms WHERE tenant_id=:t AND NOT closed AND lease_until>CURRENT_TIMESTAMP
+        AND ((:owned AND service_id=:s) OR (NOT :owned AND policy='public'))
+        AND strpos(lower(code),lower(:q))>0 ORDER BY code,room_id LIMIT :l OFFSET :o
+    """), {'t':service['tenant_id'],'s':service['service_id'],'owned':owned,'q':q,'l':limit,'o':offset}).mappings()]
+
+class RoomEdit(RoomCreate):
+    version: int = Field(strict=True,ge=1)
+
+@router.patch('/rooms/{room_id}')
+def edit_room(room_id: str, body: RoomEdit, service=Depends(service_auth), db=Depends(get_db)):
+    current=room(db,room_id,service,True)
+    active(current)
+    if current['version'] != body.version:
+        raise HTTPException(409, 'Group changed; refresh before editing')
+    if body.public_address and public_origin(body.public_address) not in service['allowed_origins']:
+        raise HTTPException(403, 'Connection origin is not approved')
+    members=db.execute(text('SELECT count(*) FROM room_members WHERE room_id=:r'), {'r':room_id}).scalar()
+    if body.capacity < members:
+        raise HTTPException(409, 'Capacity cannot be smaller than current membership')
+    params=body.model_dump() | {'r':room_id}
+    updated=db.execute(text("""UPDATE rooms SET code=:code,game=:game,protocol=:protocol,
+        capacity=:capacity,public_address=:public_address,policy=:policy,version=version+1
+        WHERE room_id=:r RETURNING *"""),params).mappings().one()
+    db.commit()
+    return dict(updated)
 
 @router.get('/rooms/{room_id}')
 def get_room(room_id: str, service=Depends(service_auth), db=Depends(get_db)):
@@ -181,6 +262,7 @@ def get_room(room_id: str, service=Depends(service_auth), db=Depends(get_db)):
         raise HTTPException(404,'Room not found')
     active(row)
     row['members']=[r[0] for r in db.execute(text('SELECT player_id FROM room_members WHERE room_id=:r'), {'r':room_id})]
+    row['member_details']=[dict(r) for r in db.execute(text('SELECT p.player_id,p.subject FROM room_members m JOIN service_players p ON p.player_id=m.player_id WHERE m.room_id=:r ORDER BY p.subject'), {'r':room_id}).mappings()]
     return row
 
 @router.post('/rooms/{room_id}/join')

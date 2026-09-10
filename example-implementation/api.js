@@ -31,7 +31,10 @@ export class SessionApi {
     try { response = await this.fetcher(url, { method, headers, body: body ? body instanceof URLSearchParams ? body.toString() : JSON.stringify(body) : undefined, signal: AbortSignal.timeout(timeoutMs) }); }
     catch (error) {
       const status = ['TimeoutError', 'AbortError'].includes(error.name) ? 504 : 503;
-      throw Object.assign(new Error(status === 504 ? 'Game service timed out. Try again.' : 'Game service unavailable. Try again.'), {status});
+      const message = status === 504
+        ? `Session API timed out at ${url.origin}. Check that the API is running.`
+        : `Session API is unavailable at ${url.origin}. Start it or set SESSION_API_URL to a reachable API.`;
+      throw Object.assign(new Error(message), {status});
     }
     const data = await response.json().catch(() => null);
     if (!response.ok) throw Object.assign(new Error(`API ${method} ${path}: ${response.status}`), { status: response.status, retryAfter: response.headers?.get('retry-after') });
@@ -57,8 +60,12 @@ export class SessionApi {
   grantPlayer(token, serviceId, playerId) { return this.request('POST', `/v1/services/${encodeURIComponent(serviceId)}/players/${encodeURIComponent(playerId)}`, token); }
   serviceRequest(method, path, credential, body, query) { return this.request(method, `/v1${path}`, null, body, query, { Authorization: `Service ${credential}` }); }
   createPlayer(credential, player) { return this.serviceRequest('POST', '/players', credential, player); }
+  listPlayers(credential, limit = 100, offset = 0, q = '') { return this.serviceRequest('GET', '/players', credential, null, {limit, offset, q}); }
+  editPlayer(credential, playerId, body) { return this.serviceRequest('PATCH', `/players/${encodeURIComponent(playerId)}`, credential, body); }
+  editRoom(credential, roomId, body) { return this.serviceRequest('PATCH', `/rooms/${encodeURIComponent(roomId)}`, credential, body); }
+  deletePlayer(credential, playerId) { return this.serviceRequest('DELETE', `/players/${encodeURIComponent(playerId)}`, credential); }
   createRoom(credential, room) { return this.serviceRequest('POST', '/rooms', credential, room); }
-  listRooms(credential, limit, offset) { return this.serviceRequest('GET', '/rooms', credential, null, { limit, offset }); }
+  listRooms(credential, limit = 100, offset = 0, extra = {}) { return this.serviceRequest('GET', '/rooms', credential, null, { limit, offset, ...extra }); }
   getRoom(credential, roomId) { return this.serviceRequest('GET', `/rooms/${encodeURIComponent(roomId)}`, credential); }
   joinRoom(credential, roomId, playerId) { return this.serviceRequest('POST', `/rooms/${encodeURIComponent(roomId)}/join`, credential, { player_id: playerId }); }
   leaveRoom(credential, roomId, playerId) { return this.serviceRequest('POST', `/rooms/${encodeURIComponent(roomId)}/leave`, credential, { player_id: playerId }); }
