@@ -19,11 +19,12 @@ function feedback(message = '', error = false) {
 }
 function render() {
   el('auth-view').hidden = !!user;
+  el('connection').hidden = !user || connected;
   el('home-view').hidden = !user || !!room;
   el('room-view').hidden = !user || !room;
   el('account-button').hidden = !user;
   el('identity').textContent = user?.username || '';
-  el('greeting').textContent = user ? `Ready to play, ${user.username}?` : 'Ready to play?';
+  el('greeting').textContent = user ? `Player: ${user.username}` : 'Ready to play?';
   el('account-name').textContent = user?.username || '';
   el('room-preview').hidden = !preview;
   if (preview) {
@@ -52,7 +53,7 @@ function render() {
       el('question').textContent = winners.length > 1 ? 'It’s a tie!' : `${winners[0]} takes the win!`;
       el('room-description').textContent = `${winners.join(' & ')} finished with ${ranked[0].score} of ${room.totalQuestions} points. Head back to the lobby to start another room.`;
     } else if (lobby) {
-      el('question').textContent = host ? 'Your quiz night starts here.' : 'You’re in. Get ready!';
+      el('question').textContent = host ? 'Players, ready?' : 'You’re in. Get ready!';
       el('room-description').textContent = host ? 'Share your room code with friends, then start when everyone is here.' : `Invite a friend while you wait for ${room.host} to start the quiz.`;
     } else {
       el('question').textContent = room.question.text;
@@ -129,8 +130,8 @@ function authMode(next) {
   mode = next;
   el('login-tab').setAttribute('aria-pressed', String(mode === 'login'));
   el('register-tab').setAttribute('aria-pressed', String(mode === 'register'));
-  el('auth-title').textContent = mode === 'login' ? 'Welcome back' : 'Join the fun';
-  el('auth-description').textContent = mode === 'login' ? 'Your next quiz night starts here.' : 'Pick a username your friends will recognize.';
+  el('auth-title').textContent = mode === 'login' ? 'Player sign-in' : 'New player';
+  el('auth-description').textContent = mode === 'login' ? 'Choose your player name and get ready.' : 'Pick a username your friends will recognize.';
   el('password').autocomplete = mode === 'login' ? 'current-password' : 'new-password';
   feedback(); render();
 }

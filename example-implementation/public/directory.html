@@ -1,25 +1,25 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Directory · Users & groups</title><link rel="stylesheet" href="/directory.css"></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Starport · Crew console</title><link rel="stylesheet" href="/directory.css"></head>
 <body>
 <div class="app-shell">
   <aside class="sidebar">
-    <a class="brand" href="/" aria-label="Directory home"><span class="brand-mark">D</span>Directory<span class="demo-tag">DEMO</span></a>
-    <p class="nav-label">WORKSPACE</p>
+    <a class="brand" href="/" aria-label="Directory home"><span class="brand-mark">✦</span>STARPORT<span class="demo-tag">OPS</span></a>
+    <p class="nav-label">MANIFEST</p>
     <nav aria-label="Directory sections"><button data-view="users" class="nav-item active" aria-current="page"><span>Users</span><span id="users-count" class="count">—</span></button><button data-view="groups" class="nav-item"><span>Groups</span><span id="groups-count" class="count">—</span></button></nav>
-    <div class="sidebar-note"><span class="live-dot"></span> Service directory<p>Manage the users and groups available to this service.</p></div>
+    <div class="sidebar-note"><span class="live-dot"></span> Station control<p>Register crew, assign groups, and keep your rooms online.</p></div>
   </aside>
   <main>
-    <header class="page-header"><div><p class="eyebrow">YOUR DIRECTORY</p><h1 id="page-title">Users</h1><p id="page-description">Find people, update their details, and manage group membership.</p></div><div class="header-actions"><button id="refresh" class="secondary">Refresh</button><button id="add" class="primary">+ Add user</button></div></header>
+    <header class="page-header"><div><p class="eyebrow">STATION 07 / CREW OPERATIONS</p><h1 id="page-title">Users</h1><p id="page-description">Find people, update their details, and manage group membership.</p></div><div class="header-actions"><button id="refresh" class="secondary">Refresh</button><button id="add" class="primary">+ Add user</button></div></header>
     <div id="status" class="notice" role="status" aria-live="polite" hidden></div>
     <div class="workspace">
       <section class="list-panel" aria-labelledby="list-title"><div class="list-toolbar"><h2 id="list-title">All users</h2><label class="search"><span class="sr-only">Search users or groups by name</span><input id="search" type="search" placeholder="Search users…" autocomplete="off"></label></div><div id="records" class="records" aria-live="polite"><p class="empty">Loading your directory…</p></div><button id="load-more" class="load-more secondary" hidden>Load more</button></section>
-      <section id="detail" class="detail-panel" aria-label="Selected item details"><div class="empty-detail"><span class="empty-icon">↗</span><h2>A place for everyone.</h2><p>Select a user to see their details and manage their groups.</p></div></section>
+      <section id="detail" class="detail-panel" aria-label="Selected item details"><div class="empty-detail"><span class="empty-icon" aria-hidden="true">⌖</span><h2>Awaiting selection</h2><p>Select a user to see their details and manage their groups.</p></div></section>
     </div>
     <p class="footer-note">Groups are live rooms. Their 90-second lease is renewed only when you choose to keep a selected group active.</p>
   </main>
 </div>
-<dialog id="editor" aria-labelledby="editor-title"><form id="edit-form"><div class="dialog-heading"><div><p class="eyebrow" id="editor-kicker">DIRECTORY</p><h2 id="editor-title">Add user</h2></div><button class="icon-button" type="button" data-dismiss aria-label="Close form">×</button></div><p id="editor-description" class="muted"></p><div id="editor-fields"></div><p id="form-error" class="form-error" role="alert" hidden></p><div class="dialog-actions"><button class="secondary" type="button" data-dismiss>Cancel</button><button id="save" class="primary" type="submit">Add user</button></div></form></dialog>
+<dialog id="editor" aria-labelledby="editor-title"><form id="edit-form"><div class="dialog-heading"><div><p class="eyebrow" id="editor-kicker">STATION CONTROL</p><h2 id="editor-title">Add user</h2></div><button class="icon-button" type="button" data-dismiss aria-label="Close form">×</button></div><p id="editor-description" class="muted"></p><div id="editor-fields"></div><p id="form-error" class="form-error" role="alert" hidden></p><div class="dialog-actions"><button class="secondary" type="button" data-dismiss>Cancel</button><button id="save" class="primary" type="submit">Add user</button></div></form></dialog>
 <dialog id="confirmation" aria-labelledby="confirm-title"><form method="dialog"><p class="eyebrow">PLEASE CONFIRM</p><h2 id="confirm-title"></h2><p id="confirm-description" class="muted"></p><div class="dialog-actions"><button class="secondary" value="cancel" autofocus>Cancel</button><button id="confirm-action" class="danger" value="confirm">Delete</button></div></form></dialog>
 <script type="module" src="/directory.js"></script>
 </body></html>

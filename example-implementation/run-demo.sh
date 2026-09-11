@@ -6,13 +6,16 @@ example=trivia
 if [[ "${1:-}" == "--directory-example" ]]; then
   example=directory
   shift
+elif [[ "${1:-}" == "--euchre-example" ]]; then
+  example=euchre
+  shift
 elif [[ "${1:-}" == --* ]]; then
-  printf 'Unknown option: %s\nUsage: %s [--directory-example]\n' "$1" "$0" >&2
+  printf 'Unknown option: %s\nUsage: %s [--directory-example|--euchre-example]\n' "$1" "$0" >&2
   exit 2
 fi
 
 if [[ $# -gt 0 ]]; then
-  printf 'Unexpected argument: %s\nUsage: %s [--directory-example]\n' "$1" "$0" >&2
+  printf 'Unexpected argument: %s\nUsage: %s [--directory-example|--euchre-example]\n' "$1" "$0" >&2
   exit 2
 fi
 EXAMPLE="$example" docker compose -f "$compose_file" up --build -d --wait

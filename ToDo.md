@@ -55,15 +55,15 @@ Acceptance: two independent game servers can manage several rooms without impers
 
 ## P2 — Finish or explicitly defer incomplete functions
 
-- [x] Explicitly defer friendship management and persistent messaging APIs. Empty routers stay unregistered; private legacy SQL is not advertised as an authenticated social API. Realtime trivia chat/events remain the game server's responsibility.
-- [x] Record the deferred friendship requirements: authenticated send/list/accept/reject/cancel/remove, recipient-only resolution, self/duplicate/expiry/transition checks. These are prerequisites for any future social API, not shipped endpoints.
+- [x] Restore authenticated friendship management under `/friends`. Persistent messaging remains deferred; its empty router is unregistered.
+- [x] Implement authenticated send/list/accept/reject/cancel/remove, recipient-only resolution, self/duplicate/expiry checks, serialized pair transitions, pagination, and HTTP integration coverage.
 - [x] Repair `get_friend_sessions.sql` to return paginated rows without temporary tables; verify blacklist/private/friends policy and scrub passcodes/access lists.
 - [x] Add cascading foreign keys and social uniqueness constraints, including one undirected friendship and one pending request per pair. Fail upgrades visibly on invalid historical records rather than discard data.
 - [x] Record deferred messaging requirements: sender-derived identity, recipient authorization, pagination/read state, retention, and abuse controls before enabling a messaging API.
 - [x] Audit Steam lookup and inactivity helpers; repair atomic code/metadata updates in legacy `update_session.sql`. Convert historical timestamps under a documented UTC assumption. Leave the legacy inactivity job unscheduled; service leases define room presence.
 - [x] Verify transactional account deletion cleanup for owned legacy sessions, friendships, requests, messages, and external identity mappings.
 
-Verified with PostgreSQL 16 on 2026-09-09: paginated discovery/access policy, unique-pair constraints, code rotation/conflict rollback, and cascading deletion/rollback. See [legacy social decisions and migration prerequisites](docs/legacy-social.md). Friendship/message HTTP features remain explicitly deferred.
+Verified with PostgreSQL 16 on 2026-09-09: paginated discovery/access policy, unique-pair constraints, code rotation/conflict rollback, and cascading deletion/rollback. See [legacy social decisions and migration prerequisites](docs/legacy-social.md). Friendship HTTP lifecycle, authorization, expiry, concurrency, and cascading account deletion verified against PostgreSQL on 2026-09-11. Messaging remains deferred.
 
 Acceptance: each retained capability has documented contracts, authorization or database-integrity checks, and integration coverage; deferred capabilities are clearly marked rather than advertised as working.
 
@@ -84,3 +84,13 @@ Acceptance: CI catches contract and authorization regressions, the complete exam
 ## Example implementation
 
 See [`example-implementation/`](example-implementation/) for the Node.js WebSocket trivia game, setup, endpoint mapping, and test commands. Use ordinary player workflows for gameplay and a separate operator script for admin-only endpoints. Do not expose administrator credentials to the browser.
+
+
+## Euchre demo — 2026-09-11
+
+- [x] Add `--euchre-example` / `EXAMPLE=euchre` with 1–4 humans and bots filling four seats.
+- [x] Implement authoritative bidding, bowers, following suit, dealer discard, lone hands, tricks, and scoring to ten with private hand snapshots.
+- [x] Add account and friendship controls, table discovery, service membership, moderation, lease renewal, and cleanup.
+- [x] Verify a full game against the real API/PostgreSQL, plus engine and WebSocket regression tests; document the endpoint mapping and operator-only workflows.
+
+- [x] Give Trivia an arcade cabinet, Euchre a wood-and-felt table, and the directory a Starport console; enable one-human Euchre with three bots and verify solo engine/WebSocket gameplay.

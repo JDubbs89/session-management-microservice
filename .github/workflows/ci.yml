@@ -80,6 +80,8 @@ jobs:
           done
           curl --fail http://127.0.0.1:8000/health/ready
           node tests/integration/live-api.mjs
+          python tests/integration/friendships.py
+          EUCHRE_LIVE_TEST=1 DIRECTORY_ADMIN_USERNAME=integration-admin DIRECTORY_ADMIN_PASSWORD="$INTEGRATION_ADMIN_PASSWORD" node --test example-implementation/test/euchre-websocket.test.js
           python tests/integration/services.py
           python tests/integration/identity.py
           python tests/integration/release.py

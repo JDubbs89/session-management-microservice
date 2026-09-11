@@ -16,9 +16,11 @@ The game server owns gameplay, rooms, membership, timers, and scoring. This API 
 - User registration, login, profile lookup, presence logout, and account deletion.
 - Admin-only user creation, lookup, and deletion.
 - Session creation, host/code discovery, updates, and deletion.
+- Authenticated friend requests, acceptance, rejection, cancellation, friend lists, and removal.
+- A 1–4 player [Euchre demo](example-implementation/README.md#euchre) with bots, friendships, and leased service rooms.
 - A [Node.js WebSocket trivia example](example-implementation/) with player workflows and a separate administrator endpoint exercise.
 
-Friendship and messaging APIs are explicitly deferred; retained legacy SQL and account cleanup are documented in [the social capability decision](docs/legacy-social.md). Steam is optional; account IDs and neutral subjects are generated server-side. Legacy Steam fields and `beacon_metadata` remain for compatibility. Logout increments the persistent token version, so old JWTs remain revoked after subsequent logins and database restarts. The repository includes a disposable PostgreSQL CI contract suite and a bounded load probe; the load probe reports targets but is not a production capacity claim.
+Friendship APIs are available under `/friends`. Persistent messaging remains deferred; retained legacy SQL and account cleanup are documented in [the social capability decision](docs/legacy-social.md). Steam is optional; account IDs and neutral subjects are generated server-side. Legacy Steam fields and `beacon_metadata` remain for compatibility. Logout increments the persistent token version, so old JWTs remain revoked after subsequent logins and database restarts. The repository includes a disposable PostgreSQL CI contract suite and a bounded load probe; the load probe reports targets but is not a production capacity claim.
 
 ## Complete Docker demo
 
@@ -29,6 +31,14 @@ docker-compose -f example-implementation/docker-compose.yml up --build -d --wait
 ```
 
 Open http://127.0.0.1:3000 in two windows. The game calls the API container directly; PostgreSQL initializes automatically on the first boot. Only the game port is published. This local demo uses its own persistent volume and development credentials, with no environment file required. See [the demo instructions](example-implementation/README.md#run-the-complete-demo-with-docker) for port overrides, logs, shutdown, and administrator setup.
+
+To play Euchre with the same API and persistent database:
+
+```sh
+./example-implementation/run-demo.sh --euchre-example
+```
+
+Use separate browser profiles for each player. See the [Euchre walkthrough and endpoint mapping](example-implementation/README.md#euchre).
 
 ## Local setup
 
@@ -62,10 +72,11 @@ Protected routes require `Authorization: Bearer <player-token>`. Login uses an O
 | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Liveness       | `GET /`                                                                                                                                                                                      |
 | Accounts       | `POST /users/register`, `POST /users/login`, `GET /users/me`, `POST /users/logout`, `DELETE /users/delete_me`                                                                                |
+| Friends | `GET /friends`, `GET /friends/requests`, `POST /friends/requests`, `POST /friends/requests/{request_id}`, `DELETE /friends/{friend_id}` |
 | Administration | `POST /users/register_admin`, `GET /users/get_user`, `DELETE /users/delete`                                                                                                                  |
 | Sessions       | `POST /sessions/create`, `GET /sessions/read_friend_session`, `GET /sessions/read_friend_session_data`, `GET /sessions/read_session_data`, `PUT /sessions/update`, `DELETE /sessions/delete` |
 
-The `read_friend_session` names are legacy host lookup routes; actual access depends on the stored session policy. An HTTP route for creating friendships does not yet exist. Automatic FastAPI documentation routes are not gameplay endpoints.
+The `read_friend_session` names are legacy host lookup routes; actual access depends on the stored session policy. Authenticated friendship operations are documented in [the social API contract](docs/legacy-social.md). Automatic FastAPI documentation routes are not gameplay endpoints.
 
 ## Tests
 

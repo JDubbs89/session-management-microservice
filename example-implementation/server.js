@@ -7,7 +7,7 @@ import { MockApi } from './mock-api.js';
 import { Game } from './game.js';
 import { readToken, expiresAt, cookie, jsonBody } from './cookie-auth.js';
 
-export function createTriviaServer(api, { origin = 'http://127.0.0.1:3000', cleanupRetryMs = 1000, cleanupMaxAttempts = 5, actionIntervalMs = 1100 } = {}) {
+export function createTriviaServer(api, { origin = 'http://127.0.0.1:3000', cleanupRetryMs = 1000, cleanupMaxAttempts = 5, actionIntervalMs = 1100, GameClass = Game, gameName = 'trivia', assetsPrefix = '' } = {}) {
   const publicUrl = new URL(origin);
   const allowedOrigins = new Set([publicUrl.origin]);
   if (['localhost', '127.0.0.1', '[::1]'].includes(publicUrl.hostname)) {
@@ -25,6 +25,10 @@ export function createTriviaServer(api, { origin = 'http://127.0.0.1:3000', clea
   let shutdownPromise;
   function publicError(error) {
     if (error.status === 401) return 'Sign in again.';
+    if (error.status === 403) return 'You are not allowed to perform that action.';
+    if (error.status === 404) return 'That player, request, or table is no longer available.';
+    if (error.status === 409) return 'That action conflicts with the current state. Refresh the list and try again.';
+    if (error.status === 422) return 'Check the username or selection and try again.';
     if (error.status === 429) return 'Too many requests. Wait a moment and try again.';
     if (error.status >= 500 || ['TimeoutError', 'AbortError'].includes(error.name)) return 'Game service unavailable. Try again.';
     return error.message;
@@ -106,7 +110,7 @@ export function createTriviaServer(api, { origin = 'http://127.0.0.1:3000', clea
   const server = http.createServer(async (req, res) => {
     if (stopping) { res.writeHead(503).end('Server restarting. Reconnect shortly.'); return; }
     if (req.url.startsWith('/auth/')) { await auth(req, res); return; }
-    const assets = { '/': ['index.html', 'text/html'], '/app.js': ['app.js', 'text/javascript'], '/styles.css': ['styles.css', 'text/css'] };
+    const assets = { '/': [`${assetsPrefix}index.html`, 'text/html'], '/app.js': [`${assetsPrefix}app.js`, 'text/javascript'], '/styles.css': [`${assetsPrefix}styles.css`, 'text/css'] };
     const asset = Object.hasOwn(assets, req.url) ? assets[req.url] : null;
     if (!asset || !['GET', 'HEAD'].includes(req.method)) { res.writeHead(404).end(); return; }
     try {
@@ -143,12 +147,13 @@ export function createTriviaServer(api, { origin = 'http://127.0.0.1:3000', clea
     } finally { if (session) reservations.delete(session.user.username); }
   });
   function send(ws, data) { if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(data)); }
-  function broadcast(room) { for (const ws of wss.clients) if (ws.room === room) send(ws, { state: { ...room.game.snapshot(), hasAnswered: room.game.answers.has(ws.user?.username) } }); }
+  function broadcast(room) { for (const ws of wss.clients) if (ws.room === room) send(ws, { state: { ...room.game.snapshot(ws.user?.username), hasAnswered: room.game.answers.has(ws.user?.username) } }); }
   async function publishCount(room) {
     if (room.closing) return;
     try {
       await api.update(room.token, room.game.code, {
-        beacon_metadata: { ...room.metadata, player_count: room.game.players.size }
+        beacon_metadata: { ...room.metadata, player_count: room.game.players.size },
+        ...(room.game.finished ? {session_status: 'ended'} : {})
       });
     } catch (error) {
       for (const peer of wss.clients) if (peer.room === room)
@@ -158,6 +163,7 @@ export function createTriviaServer(api, { origin = 'http://127.0.0.1:3000', clea
   async function leave(ws) {
     const room = ws.room;
     if (!room) return;
+    if (room.starting) await room.starting.catch(() => {});
     if (room.game.host === ws.user.username) {
       room.closing = true;
       let failure;
@@ -172,7 +178,10 @@ export function createTriviaServer(api, { origin = 'http://127.0.0.1:3000', clea
         throw failure;
       }
     } else {
-      room.game.players.delete(ws.user.username); room.game.answers.delete(ws.user.username); ws.room = null;
+      try { await api.playerLeft?.(room.game.code, ws.user); }
+      catch (error) { if (ws.readyState !== WebSocket.CLOSED) throw error; }
+      room.game.players.delete(ws.user.username); room.game.answers.delete(ws.user.username);
+      room.game.runBots?.(); ws.room = null;
       send(ws, { state: null, notice: 'You left the room.' });
       broadcast(room);
       await publishCount(room);
@@ -185,7 +194,7 @@ export function createTriviaServer(api, { origin = 'http://127.0.0.1:3000', clea
     expiryTimer.unref();
     ws.on('message', async raw => {
       let message;
-      try { message = JSON.parse(raw); } catch { return send(ws, { error: 'Invalid request.' }); }
+      try { message = JSON.parse(raw); if (!message || typeof message !== 'object' || Array.isArray(message)) throw new Error('Invalid message'); } catch { return send(ws, { error: 'Invalid request.' }); }
       if (ws.busy || Date.now() - ws.lastAction < actionIntervalMs || stopping) {
         send(ws, { error: stopping ? 'Server restarting. Reconnect shortly.' : ws.busy ? 'Previous action is still running.' : 'Wait one second between actions.', retryable: true });
         if (message.id !== undefined) send(ws, { done: message.id });
@@ -206,9 +215,9 @@ export function createTriviaServer(api, { origin = 'http://127.0.0.1:3000', clea
               if (pendingCleanup.has(cleanup.code)) throw fail(503, 'Previous room cleanup pending');
             }
             const code = randomInt(100000, 1000000);
-            const metadata = { session_flavortext: 'Three-question trivia', player_count: 1, max_player_count: 4, session_start_time: new Date().toISOString(), host_username: ws.user.username, host_steam_id: '' };
+            const metadata = { session_flavortext: gameName === 'euchre' ? 'Euchre · 1–4 players' : 'Three-question trivia', player_count: 1, max_player_count: 4, session_start_time: new Date().toISOString(), host_username: ws.user.username, host_steam_id: '' };
             await api.create(ws.token, { session_code: code, host_username: ws.user.username, host_user_id: ws.user.user_id, host_steam_id: '', beacon_metadata: JSON.stringify(metadata), session_passcode: '', session_whitelist: '[]', session_blacklist: '[]', session_status: 'active', allow_join: 'public' }, metadata);
-            const room = { game: new Game(ws.user.username, code), token: ws.token, metadata };
+            const room = { game: new GameClass(ws.user.username, code), token: ws.token, metadata };
             room.game.join(ws.user.username); rooms.set(code, room); ws.room = room; broadcast(room);
           } else if (m.action === 'preview') {
             const data = m.host ? await api.previewHost(ws.token, m.host) : await api.previewCode(ws.token, Number(m.code));
@@ -218,14 +227,51 @@ export function createTriviaServer(api, { origin = 'http://127.0.0.1:3000', clea
             const session = await api.byHost(ws.token, String(m.host));
             const room = rooms.get(session.session_code);
             if (!room || room.closing) throw new Error('Room is not on this game server');
-            room.game.join(ws.user.username); ws.room = room; broadcast(room);
+            if (room.joining || room.starting) throw new Error('The table is busy. Try again.');
+            room.joining = true;
+            try {
+              if (room.game.round >= 0 || room.game.players.size >= 4) throw new Error('Room full or game started');
+              await api.playerJoined?.(room.game.code, ws.user);
+              if (room.closing) { await api.playerLeft?.(room.game.code, ws.user); throw new Error('Host closed the table'); }
+              room.game.join(ws.user.username); ws.room = room;
+            } finally { room.joining = false; } broadcast(room);
             await publishCount(room);
+          } else if (m.action === 'tables' && api.discoverTables) {
+            send(ws, {tables: await api.discoverTables()});
+          } else if (m.action === 'ban' && api.banFromTable) {
+            const room = ws.room;
+            if (!room || room.game.host !== ws.user.username || room.game.round >= 0) throw new Error('Only the host can remove a player before dealing');
+            const peer = [...wss.clients].find(peer => peer.room === room && peer.user.username === m.username && peer !== ws);
+            if (!peer || peer.busy || room.joining) throw new Error('Player unavailable or busy');
+            peer.busy = true;
+            try {
+              await api.banFromTable(room.game.code, peer.user);
+              room.game.players.delete(peer.user.username); peer.room = null;
+              send(peer, {state: null, notice: 'The host removed you from the table.'}); broadcast(room);
+              await publishCount(room);
+            } finally { peer.busy = false; if (peer.readyState === WebSocket.CLOSED) peer.cleanup(); }
+          } else if (m.action === 'social') {
+            if (m.operation === 'send') await api.sendFriendRequest(ws.token, String(m.username));
+            else if (m.operation === 'resolve') await api.resolveFriendRequest(ws.token, m.requestId, m.resolution);
+            else if (m.operation === 'remove') await api.removeFriend(ws.token, String(m.friendId));
+            else if (m.operation !== 'list') throw new Error('Unknown social operation');
+            send(ws, {social: {friends: await api.friends(ws.token), requests: await api.friendRequests(ws.token)}});
+          } else if (m.action === 'card') {
+            if (!ws.room || ws.room.closing || !ws.room.game.act) throw new Error('Join a Euchre table first');
+            if (!m.move || typeof m.move !== 'object') throw new Error('Choose a card or bid');
+            ws.room.game.act(ws.user.username, m.move); broadcast(ws.room);
+            if (ws.room.game.finished) await publishCount(ws.room);
           } else if (m.action === 'next') {
             const room = ws.room;
             if (!room || room.closing || room.game.host !== ws.user.username) throw new Error('Only the room host can advance');
             if (room.game.finished) throw new Error('Game finished');
-            await api.update(ws.token, room.game.code, { beacon_metadata: { ...room.metadata, player_count: room.game.players.size }, allow_join: 'private', ...(room.game.round + 1 >= room.game.snapshot().totalQuestions ? {session_status: 'ended'} : {}) });
-            room.game.next(ws.user.username); broadcast(room);
+            if (room.joining) throw new Error('Wait for the joining player');
+            if (gameName === 'euchre' && !['lobby', 'handEnd'].includes(room.game.phase)) throw new Error('Finish the current hand before dealing');
+            room.starting = (async () => {
+              await api.update(ws.token, room.game.code, { beacon_metadata: { ...room.metadata, player_count: room.game.players.size }, allow_join: 'private', ...(room.game.round + 1 >= room.game.snapshot().totalQuestions ? {session_status: 'ended'} : {}) });
+              room.game.next(ws.user.username); broadcast(room);
+            })();
+            try { await room.starting; } finally { room.starting = null; }
 
           } else if (m.action === 'answer') {
             if (!ws.room) throw new Error('Join a room first');
@@ -274,7 +320,7 @@ export function createTriviaServer(api, { origin = 'http://127.0.0.1:3000', clea
   }
   return { server, wss, rooms, pendingCleanup, shutdown };
 }
-if (process.argv[1] === new URL(import.meta.url).pathname) {
+export async function startTrivia() {
   const mock = process.env.TRIVIA_MOCK === '1';
   const api = mock ? new MockApi() : new SessionApi(process.env.SESSION_API_URL);
   await api.health();
@@ -287,3 +333,5 @@ if (process.argv[1] === new URL(import.meta.url).pathname) {
   });
   server.listen(port, process.env.HOST || '127.0.0.1', () => console.log(`Trivia: ${process.env.PUBLIC_ORIGIN || `http://127.0.0.1:${port}`} (${mock ? 'MOCK — no real API calls' : 'real API'})`));
 }
+
+if (process.argv[1] === new URL(import.meta.url).pathname) await startTrivia();

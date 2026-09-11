@@ -8,6 +8,7 @@ from contextlib import asynccontextmanager
 from core.telemetry import TelemetryMiddleware, render_metrics
 from auth import require_role
 from fastapi.responses import PlainTextResponse
+from routers.friendship_routes import router as friendship_router
 from routers.user_routes import router as user_router
 from routers.session_routes import router as session_router
 from routers.service_routes import router as service_router
@@ -26,6 +27,7 @@ async def lifespan(app):
 
 app = FastAPI(title='Session Management API', version='1.1.0', lifespan=lifespan)
 app.include_router(user_router)
+app.include_router(friendship_router)
 app.include_router(session_router)
 app.include_router(service_router)
 app.state.limiter = limiter

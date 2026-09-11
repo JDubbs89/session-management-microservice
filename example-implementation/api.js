@@ -40,6 +40,11 @@ export class SessionApi {
     if (!response.ok) throw Object.assign(new Error(`API ${method} ${path}: ${response.status}`), { status: response.status, retryAfter: response.headers?.get('retry-after') });
     return data;
   }
+  friends(token) { return this.request('GET', '/friends', token); }
+  friendRequests(token) { return this.request('GET', '/friends/requests', token); }
+  sendFriendRequest(token, username) { return this.request('POST', '/friends/requests', token, {username}); }
+  resolveFriendRequest(token, id, action) { return this.request('POST', `/friends/requests/${encodeURIComponent(id)}`, token, {action}); }
+  removeFriend(token, id) { return this.request('DELETE', `/friends/${encodeURIComponent(id)}`, token); }
   health() { return this.request('GET', '/'); }
   register(user) { return this.request('POST', '/users/register', null, user); }
   registerAdmin(token, user) { return this.request('POST', '/users/register_admin', token, user); }

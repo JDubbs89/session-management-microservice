@@ -44,7 +44,7 @@ function switchView(view) {
   state.view=view;
   for(const button of document.querySelectorAll('[data-view]')) {button.classList.toggle('active',button.dataset.view===view);if(button.dataset.view===view)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');}
   $('#page-title').textContent=view==='users'?'Users':'Groups';
-  $('#page-description').textContent=view==='users'?'Find people, update their details, and manage group membership.':'Bring users together and keep live groups organized.';
+  $('#page-description').textContent=view==='users'?'Crew manifest. Select a user to inspect their assignments.':'Room telemetry. Select a group to inspect its crew and status.';
   $('#list-title').textContent=view==='users'?'All users':'Your groups';
   $('#add').textContent=view==='users'?'+ Add user':'+ Add group';
   $('#search').placeholder=`Search ${view}…`; $('#search').value=state.query[view];
@@ -56,7 +56,7 @@ function renderDetail() {
   const user=state.users.find(u=>u.player_id===state.selected.users);
   const group=state.room;
   if((state.view==='users'&&!user)||(state.view==='groups'&&(!group||group.room_id!==state.selected.groups))) {
-    $('#detail').innerHTML=`<div class="empty-detail"><span class="empty-icon">↗</span><h2>${state.view==='users'?'A place for everyone.':'Better together.'}</h2><p>Select a ${state.view==='users'?'user':'group'} to see details and manage membership.</p></div>`;return;
+    $('#detail').innerHTML=`<div class="empty-detail"><span class="empty-icon" aria-hidden="true">⌖</span><h2>${state.view==='users'?'Awaiting crew selection':'Awaiting room selection'}</h2><p>Select a ${state.view==='users'?'user':'group'} to see details and manage membership.</p></div>`;return;
   }
   if(state.view==='users') {
     const groups=user.groups||[],options=groupOptions(groups.map(g=>g.room_id));
